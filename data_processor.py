@@ -122,6 +122,23 @@ def process_ticket_data(excel_file):
             'data': year_status_counts.values.tolist()
         }
     
+    # 5.2 审核状态统计
+    audit_counts = df['审核状态'].value_counts()
+    audit_stats = {
+        'labels': audit_counts.index.tolist(),
+        'data': audit_counts.values.tolist()
+    }
+    
+    # 5.3 按年度分组的审核状态统计
+    audit_by_year = {}
+    for year in df['年份'].dropna().unique():
+        year_data = df[df['年份'] == year]
+        year_audit_counts = year_data['审核状态'].value_counts()
+        audit_by_year[str(int(year))] = {
+            'labels': year_audit_counts.index.tolist(),
+            'data': year_audit_counts.values.tolist()
+        }
+    
     # 6. 月度趋势分析
     df['年月'] = df['创建日期'].dt.to_period('M')
     monthly_counts = df['年月'].value_counts().sort_index()
@@ -160,6 +177,8 @@ def process_ticket_data(excel_file):
         'type_by_year': type_by_year,
         'status_stats': status_stats,
         'status_by_year': status_by_year,
+        'audit_stats': audit_stats,
+        'audit_by_year': audit_by_year,
         'monthly_stats': monthly_stats,
         'monthly_by_year': monthly_by_year
     }

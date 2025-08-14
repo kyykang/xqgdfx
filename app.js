@@ -127,6 +127,12 @@ function setupEventListeners() {
         updateStatusChart(this.value);
     });
     
+    // 草稿勾选框事件监听器
+    document.getElementById('exclude-draft').addEventListener('change', function() {
+        const yearFilter = document.getElementById('status-year-filter');
+        updateStatusChart(yearFilter.value);
+    });
+    
     document.getElementById('monthly-year-filter').addEventListener('change', function() {
         updateMonthlyChart(this.value);
     });
@@ -513,17 +519,54 @@ function createStatusChart() {
 function updateStatusChart(year) {
     if (!charts.status) return;
     
-    let data;
+    let statusData;
+    let auditData;
+    
     if (year === 'all') {
-        data = ticketData.status_stats;
+        statusData = ticketData.status_stats;
+        auditData = ticketData.audit_stats;
     } else {
-        data = ticketData.status_by_year[year] || { labels: [], data: [] };
+        statusData = ticketData.status_by_year[year] || { labels: [], data: [] };
+        auditData = ticketData.audit_by_year[year] || { labels: [], data: [] };
     }
     
-    charts.status.data.labels = data.labels;
-    charts.status.data.datasets[0].data = data.data;
-    charts.status.data.datasets[0].backgroundColor = chartColors.slice(0, data.labels.length);
-    charts.status.data.datasets[0].borderColor = chartColors.slice(0, data.labels.length);
+    // 检查是否需要排除草稿
+    const excludeDraft = document.getElementById('exclude-draft').checked;
+    
+    let filteredLabels = [];
+    let filteredData = [];
+    
+    if (excludeDraft && auditData.labels.includes('草稿')) {
+        // 获取草稿数量
+        const draftIndex = auditData.labels.indexOf('草稿');
+        const draftCount = auditData.data[draftIndex];
+        
+        // 从状态数据中减去草稿数量（草稿通常在"未结束"状态中）
+        for (let i = 0; i < statusData.labels.length; i++) {
+            const label = statusData.labels[i];
+            let count = statusData.data[i];
+            
+            // 如果是"未结束"状态，减去草稿数量
+            if (label === '未结束') {
+                count = Math.max(0, count - draftCount);
+            }
+            
+            // 只添加数量大于0的状态
+            if (count > 0) {
+                filteredLabels.push(label);
+                filteredData.push(count);
+            }
+        }
+    } else {
+        // 不过滤，使用原始数据
+        filteredLabels = statusData.labels;
+        filteredData = statusData.data;
+    }
+    
+    charts.status.data.labels = filteredLabels;
+    charts.status.data.datasets[0].data = filteredData;
+    charts.status.data.datasets[0].backgroundColor = chartColors.slice(0, filteredLabels.length);
+    charts.status.data.datasets[0].borderColor = chartColors.slice(0, filteredLabels.length);
     charts.status.update();
 }
 
