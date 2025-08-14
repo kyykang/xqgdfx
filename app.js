@@ -26,6 +26,7 @@ const chartColors = [
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
+    setupFileUpload();
 });
 
 // 加载数据
@@ -625,8 +626,165 @@ function showError(message) {
 // 响应式处理
 window.addEventListener('resize', function() {
     Object.values(charts).forEach(chart => {
-        if (chart) {
+        if (chart && typeof chart.resize === 'function') {
             chart.resize();
         }
     });
 });
+
+// 文件上传功能
+function setupFileUpload() {
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.querySelector('.upload-btn');
+    const uploadStatus = document.getElementById('upload-status');
+    const statusIcon = document.querySelector('.status-icon');
+    const statusText = document.querySelector('.status-text');
+    const progressFill = document.getElementById('progress-fill');
+
+    // 点击上传区域触发文件选择
+    uploadArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // 点击上传按钮触发文件选择
+    uploadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.click();
+    });
+
+    // 文件选择处理
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            handleFileUpload(file);
+        }
+    });
+
+    // 拖拽功能
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileUpload(files[0]);
+        }
+    });
+}
+
+// 处理文件上传
+function handleFileUpload(file) {
+    // 验证文件类型
+    const allowedTypes = ['.xlsx', '.xls'];
+    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    
+    if (!allowedTypes.includes(fileExtension)) {
+        showUploadError('请选择Excel文件（.xlsx 或 .xls 格式）');
+        return;
+    }
+
+    // 验证文件大小（限制为10MB）
+    if (file.size > 10 * 1024 * 1024) {
+        showUploadError('文件大小不能超过10MB');
+        return;
+    }
+
+    // 显示上传状态
+    showUploadProgress('正在上传文件...');
+
+    // 创建FormData
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // 发送文件到后端
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('上传失败');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showUploadProgress('正在处理数据...');
+            // 重新加载数据
+            setTimeout(() => {
+                loadData().then(() => {
+                    showUploadSuccess('文件上传成功，数据已更新！');
+                });
+            }, 1000);
+        } else {
+            throw new Error(data.message || '处理失败');
+        }
+    })
+    .catch(error => {
+        console.error('上传错误:', error);
+        showUploadError('上传失败: ' + error.message);
+    });
+}
+
+// 显示上传进度
+function showUploadProgress(message) {
+    const uploadStatus = document.getElementById('upload-status');
+    const statusIcon = document.querySelector('.status-icon');
+    const statusText = document.querySelector('.status-text');
+    const progressFill = document.getElementById('progress-fill');
+
+    uploadStatus.style.display = 'block';
+    statusIcon.innerHTML = '⏳';
+    statusIcon.style.animation = 'spin 1s linear infinite';
+    statusText.textContent = message;
+    progressFill.style.width = '60%';
+}
+
+// 显示上传成功
+function showUploadSuccess(message) {
+    const uploadStatus = document.getElementById('upload-status');
+    const statusIcon = document.querySelector('.status-icon');
+    const statusText = document.querySelector('.status-text');
+    const progressFill = document.getElementById('progress-fill');
+
+    statusIcon.innerHTML = '✅';
+    statusIcon.style.animation = 'none';
+    statusText.textContent = message;
+    progressFill.style.width = '100%';
+
+    // 3秒后隐藏状态
+    setTimeout(() => {
+        uploadStatus.style.display = 'none';
+        progressFill.style.width = '0%';
+    }, 3000);
+}
+
+// 显示上传错误
+function showUploadError(message) {
+    const uploadStatus = document.getElementById('upload-status');
+    const statusIcon = document.querySelector('.status-icon');
+    const statusText = document.querySelector('.status-text');
+    const progressFill = document.getElementById('progress-fill');
+
+    uploadStatus.style.display = 'block';
+    statusIcon.innerHTML = '❌';
+    statusIcon.style.animation = 'none';
+    statusText.textContent = message;
+    progressFill.style.width = '0%';
+
+    // 5秒后隐藏状态
+    setTimeout(() => {
+        uploadStatus.style.display = 'none';
+    }, 5000);
+}
