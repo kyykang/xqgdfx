@@ -54,6 +54,11 @@ function initializePage() {
     document.getElementById('date-range').textContent = 
         `${ticketData.summary.date_range.start} 至 ${ticketData.summary.date_range.end}`;
     
+    // 计算并显示草稿数量
+    const totalTickets = ticketData.summary.total_tickets;
+    const draftCount = ticketData.audit_stats.data[ticketData.audit_stats.labels.indexOf('草稿')];
+    document.getElementById('draft-count').textContent = `其中草稿: ${draftCount.toLocaleString()}`;
+    
     // 初始化全局年度筛选器
     const yearFilter = document.getElementById('year-filter');
     const years = ticketData.year_stats.labels;
