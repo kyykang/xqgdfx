@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>需求工单分析系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <header class="header">
+            <h1>📊 需求工单分析系统</h1>
+            <p class="subtitle">数据驱动的工单管理洞察</p>
+        </header>
+
+        <!-- 概览卡片 -->
+        <section class="overview-cards">
+            <div class="card">
+                <div class="card-icon">📋</div>
+                <div class="card-content">
+                    <h3 id="total-tickets">-</h3>
+                    <p>总工单数</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🏢</div>
+                <div class="card-content">
+                    <h3 id="total-departments">-</h3>
+                    <p>涉及部门</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon">📅</div>
+                <div class="card-content">
+                    <h3 id="date-range">-</h3>
+                    <p>数据时间范围</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 年度筛选器 -->
+        <section class="filter-section">
+            <div class="filter-container">
+                <label for="year-filter">📆 按年度筛选：</label>
+                <select id="year-filter">
+                    <option value="all">全部年份</option>
+                </select>
+                <div class="year-stats">
+                    <span id="filtered-count">显示全部工单</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 图表区域 -->
+        <section class="charts-grid">
+            <!-- 部门TOP10图表 -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>🏆 部门工单数量 TOP 10</h2>
+                    <p>各部门提交工单数量排名</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="deptChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 系统勾选统计 -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>💻 系统使用统计</h2>
+                    <p>OA系统、营销平台、U8C勾选情况</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="systemChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 年度趋势图表 -->
+            <div class="chart-container full-width">
+                <div class="chart-header">
+                    <h2>📈 年度工单趋势</h2>
+                    <p>各年度工单提交数量变化</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="yearChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 工单类型分布 -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>📊 工单类型分布</h2>
+                    <p>不同类型工单的数量分布</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 工单状态统计 -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>⚡ 工单状态统计</h2>
+                    <p>工单处理状态分布情况</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 月度趋势 -->
+            <div class="chart-container full-width">
+                <div class="chart-header">
+                    <h2>📅 月度工单趋势</h2>
+                    <p>按月份统计的工单提交趋势</p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>© 2024 需求工单分析系统 | 数据更新时间: <span id="update-time"></span></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
