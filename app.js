@@ -127,14 +127,38 @@ function setupEventListeners() {
         updateStatusChart(this.value);
     });
     
+    document.getElementById('monthly-year-filter').addEventListener('change', function() {
+        updateMonthlyChart(this.value);
+    });
+    
     // 草稿勾选框事件监听器
     document.getElementById('exclude-draft').addEventListener('change', function() {
         const yearFilter = document.getElementById('status-year-filter');
         updateStatusChart(yearFilter.value);
     });
     
-    document.getElementById('monthly-year-filter').addEventListener('change', function() {
-        updateMonthlyChart(this.value);
+    document.getElementById('exclude-draft-dept').addEventListener('change', function() {
+        const yearFilter = document.getElementById('dept-year-filter');
+        updateDepartmentChart(yearFilter.value);
+    });
+    
+    document.getElementById('exclude-draft-system').addEventListener('change', function() {
+        const yearFilter = document.getElementById('system-year-filter');
+        updateSystemChart(yearFilter.value);
+    });
+    
+    document.getElementById('exclude-draft-type').addEventListener('change', function() {
+        const yearFilter = document.getElementById('type-year-filter');
+        updateTypeChart(yearFilter.value);
+    });
+    
+    document.getElementById('exclude-draft-year').addEventListener('change', function() {
+        updateYearChart();
+    });
+    
+    document.getElementById('exclude-draft-monthly').addEventListener('change', function() {
+        const yearFilter = document.getElementById('monthly-year-filter');
+        updateMonthlyChart(yearFilter.value);
     });
 }
 
@@ -237,11 +261,14 @@ function createDepartmentChart() {
 function updateDepartmentChart(year) {
     if (!charts.department) return;
     
+    const excludeDraft = document.getElementById('exclude-draft-dept').checked;
     let data;
+    
     if (year === 'all') {
-        data = ticketData.dept_top10;
+        data = excludeDraft ? ticketData.dept_top10_no_draft : ticketData.dept_top10;
     } else {
-        data = ticketData.dept_by_year[year] || { labels: [], data: [] };
+        const sourceData = excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year;
+        data = sourceData[year] || { labels: [], data: [] };
     }
     
     charts.department.data.labels = data.labels;
@@ -305,11 +332,14 @@ function createSystemChart() {
 function updateSystemChart(year) {
     if (!charts.system) return;
     
+    const excludeDraft = document.getElementById('exclude-draft-system').checked;
     let data;
+    
     if (year === 'all') {
-        data = ticketData.system_stats;
+        data = excludeDraft ? ticketData.system_stats_no_draft : ticketData.system_stats;
     } else {
-        data = ticketData.system_by_year[year] || { 'OA系统': 0, '营销平台': 0, 'U8C': 0 };
+        const sourceData = excludeDraft ? ticketData.system_by_year_no_draft : ticketData.system_by_year;
+        data = sourceData[year] || { 'OA系统': 0, '营销平台': 0, 'U8C': 0 };
     }
     
     charts.system.data.labels = Object.keys(data);
@@ -385,6 +415,24 @@ function createYearChart() {
     });
 }
 
+// 更新年度趋势图表
+function updateYearChart() {
+    if (!charts.year) return;
+    
+    const excludeDraft = document.getElementById('exclude-draft-year').checked;
+    let data;
+    
+    if (excludeDraft) {
+        data = ticketData.year_stats_no_draft || ticketData.year_stats;
+    } else {
+        data = ticketData.year_stats;
+    }
+    
+    charts.year.data.labels = data.labels;
+    charts.year.data.datasets[0].data = data.data;
+    charts.year.update();
+}
+
 // 创建工单类型图表
 function createTypeChart() {
     const ctx = document.getElementById('typeChart').getContext('2d');
@@ -438,11 +486,14 @@ function createTypeChart() {
 function updateTypeChart(year) {
     if (!charts.type) return;
     
+    const excludeDraft = document.getElementById('exclude-draft-type').checked;
     let data;
+    
     if (year === 'all') {
-        data = ticketData.type_stats;
+        data = excludeDraft ? ticketData.type_stats_no_draft : ticketData.type_stats;
     } else {
-        data = ticketData.type_by_year[year] || { labels: [], data: [] };
+        const sourceData = excludeDraft ? ticketData.type_by_year_no_draft : ticketData.type_by_year;
+        data = sourceData[year] || { labels: [], data: [] };
     }
     
     charts.type.data.labels = data.labels;
@@ -643,11 +694,14 @@ function createMonthlyChart() {
 function updateMonthlyChart(year) {
     if (!charts.monthly) return;
     
+    const excludeDraft = document.getElementById('exclude-draft-monthly').checked;
     let data;
+    
     if (year === 'all') {
-        data = ticketData.monthly_stats;
+        data = excludeDraft ? ticketData.monthly_stats_no_draft : ticketData.monthly_stats;
     } else {
-        data = ticketData.monthly_by_year[year] || { labels: [], data: [] };
+        const sourceData = excludeDraft ? ticketData.monthly_by_year_no_draft : ticketData.monthly_by_year;
+        data = sourceData[year] || { labels: [], data: [] };
     }
     
     charts.monthly.data.labels = data.labels;

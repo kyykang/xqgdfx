@@ -93,6 +93,10 @@
                         <select id="dept-year-filter" class="year-filter">
                             <option value="all">全部年份</option>
                         </select>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="exclude-draft-dept" class="draft-checkbox">
+                            <label for="exclude-draft-dept">排除草稿</label>
+                        </div>
                     </div>
                 </div>
                 <div class="chart-wrapper">
@@ -110,6 +114,10 @@
                         <select id="system-year-filter" class="year-filter">
                             <option value="all">全部年份</option>
                         </select>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="exclude-draft-system" class="draft-checkbox">
+                            <label for="exclude-draft-system">排除草稿</label>
+                        </div>
                     </div>
                 </div>
                 <div class="chart-wrapper">
@@ -122,6 +130,12 @@
                 <div class="chart-header">
                     <h2>📈 年度工单趋势</h2>
                     <p>各年度工单提交数量变化</p>
+                    <div class="chart-filter">
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="exclude-draft-year" class="draft-checkbox">
+                            <label for="exclude-draft-year">排除草稿</label>
+                        </div>
+                    </div>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="yearChart"></canvas>
@@ -138,6 +152,10 @@
                         <select id="type-year-filter" class="year-filter">
                             <option value="all">全部年份</option>
                         </select>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="exclude-draft-type" class="draft-checkbox">
+                            <label for="exclude-draft-type">排除草稿</label>
+                        </div>
                     </div>
                 </div>
                 <div class="chart-wrapper">
@@ -176,6 +194,10 @@
                         <select id="monthly-year-filter" class="year-filter">
                             <option value="all">全部年份</option>
                         </select>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="exclude-draft-monthly" class="draft-checkbox">
+                            <label for="exclude-draft-monthly">排除草稿</label>
+                        </div>
                     </div>
                 </div>
                 <div class="chart-wrapper">

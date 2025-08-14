@@ -57,6 +57,24 @@ def process_ticket_data(excel_file):
             'data': year_dept_counts.values.tolist()
         }
     
+    # 1.2 排除草稿的部门统计
+    df_no_draft = df[df['审核状态'] != '草稿']
+    dept_counts_no_draft = df_no_draft['所在部门'].value_counts().head(10)
+    dept_top10_no_draft = {
+        'labels': dept_counts_no_draft.index.tolist(),
+        'data': dept_counts_no_draft.values.tolist()
+    }
+    
+    # 1.3 按年度分组的部门统计（排除草稿）
+    dept_by_year_no_draft = {}
+    for year in df_no_draft['年份'].dropna().unique():
+        year_data = df_no_draft[df_no_draft['年份'] == year]
+        year_dept_counts = year_data['所在部门'].value_counts().head(10)
+        dept_by_year_no_draft[str(int(year))] = {
+            'labels': year_dept_counts.index.tolist(),
+            'data': year_dept_counts.values.tolist()
+        }
+    
     # 2. 统计各系统勾选情况
     oa_count = len(df[df['OA系统'] == '勾选'])
     marketing_count = len(df[df['营销平台'] == '勾选'])
@@ -81,11 +99,42 @@ def process_ticket_data(excel_file):
             'U8C': u8c_year
         }
     
+    # 2.2 系统统计（排除草稿）
+    oa_count_no_draft = len(df_no_draft[df_no_draft['OA系统'] == '勾选'])
+    marketing_count_no_draft = len(df_no_draft[df_no_draft['营销平台'] == '勾选'])
+    u8c_count_no_draft = len(df_no_draft[df_no_draft['U8C'] == '勾选'])
+    
+    system_stats_no_draft = {
+        'OA系统': oa_count_no_draft,
+        '营销平台': marketing_count_no_draft,
+        'U8C': u8c_count_no_draft
+    }
+    
+    # 2.3 按年度分组的系统统计（排除草稿）
+    system_by_year_no_draft = {}
+    for year in df_no_draft['年份'].dropna().unique():
+        year_data = df_no_draft[df_no_draft['年份'] == year]
+        oa_year = len(year_data[year_data['OA系统'] == '勾选'])
+        marketing_year = len(year_data[year_data['营销平台'] == '勾选'])
+        u8c_year = len(year_data[year_data['U8C'] == '勾选'])
+        system_by_year_no_draft[str(int(year))] = {
+            'OA系统': oa_year,
+            '营销平台': marketing_year,
+            'U8C': u8c_year
+        }
+    
     # 3. 按年度统计工单数量
     year_counts = df['年份'].value_counts().sort_index()
     year_stats = {
         'labels': [str(int(year)) for year in year_counts.index if pd.notna(year)],
         'data': [int(count) for year, count in year_counts.items() if pd.notna(year)]
+    }
+    
+    # 3.1 按年度统计工单数量（排除草稿）
+    year_counts_no_draft = df_no_draft['年份'].value_counts().sort_index()
+    year_stats_no_draft = {
+        'labels': [str(int(year)) for year in year_counts_no_draft.index if pd.notna(year)],
+        'data': [int(count) for year, count in year_counts_no_draft.items() if pd.notna(year)]
     }
     
     # 4. 工单类型统计
@@ -101,6 +150,23 @@ def process_ticket_data(excel_file):
         year_data = df[df['年份'] == year]
         year_type_counts = year_data['工单类型'].value_counts()
         type_by_year[str(int(year))] = {
+            'labels': year_type_counts.index.tolist(),
+            'data': year_type_counts.values.tolist()
+        }
+    
+    # 4.2 工单类型统计（排除草稿）
+    type_counts_no_draft = df_no_draft['工单类型'].value_counts()
+    type_stats_no_draft = {
+        'labels': type_counts_no_draft.index.tolist(),
+        'data': type_counts_no_draft.values.tolist()
+    }
+    
+    # 4.3 按年度分组的工单类型统计（排除草稿）
+    type_by_year_no_draft = {}
+    for year in df_no_draft['年份'].dropna().unique():
+        year_data = df_no_draft[df_no_draft['年份'] == year]
+        year_type_counts = year_data['工单类型'].value_counts()
+        type_by_year_no_draft[str(int(year))] = {
             'labels': year_type_counts.index.tolist(),
             'data': year_type_counts.values.tolist()
         }
@@ -158,6 +224,25 @@ def process_ticket_data(excel_file):
             'data': [int(count) for period, count in year_monthly_counts.items() if pd.notna(period)]
         }
     
+    # 6.2 月度趋势分析（排除草稿）
+    df_no_draft['年月'] = df_no_draft['创建日期'].dt.to_period('M')
+    monthly_counts_no_draft = df_no_draft['年月'].value_counts().sort_index()
+    monthly_stats_no_draft = {
+        'labels': [str(period) for period in monthly_counts_no_draft.index if pd.notna(period)],
+        'data': [int(count) for period, count in monthly_counts_no_draft.items() if pd.notna(period)]
+    }
+    
+    # 6.3 按年度分组的月度趋势分析（排除草稿）
+    monthly_by_year_no_draft = {}
+    for year in df_no_draft['年份'].dropna().unique():
+        year_data = df_no_draft[df_no_draft['年份'] == year]
+        year_data['年月'] = year_data['创建日期'].dt.to_period('M')
+        year_monthly_counts = year_data['年月'].value_counts().sort_index()
+        monthly_by_year_no_draft[str(int(year))] = {
+            'labels': [str(period) for period in year_monthly_counts.index if pd.notna(period)],
+            'data': [int(count) for period, count in year_monthly_counts.items() if pd.notna(period)]
+        }
+    
     # 汇总所有统计数据
     result = {
         'summary': {
@@ -170,17 +255,26 @@ def process_ticket_data(excel_file):
         },
         'dept_top10': dept_top10,
         'dept_by_year': dept_by_year,
+        'dept_top10_no_draft': dept_top10_no_draft,
+        'dept_by_year_no_draft': dept_by_year_no_draft,
         'system_stats': system_stats,
         'system_by_year': system_by_year,
+        'system_stats_no_draft': system_stats_no_draft,
+        'system_by_year_no_draft': system_by_year_no_draft,
         'year_stats': year_stats,
+        'year_stats_no_draft': year_stats_no_draft,
         'type_stats': type_stats,
         'type_by_year': type_by_year,
+        'type_stats_no_draft': type_stats_no_draft,
+        'type_by_year_no_draft': type_by_year_no_draft,
         'status_stats': status_stats,
         'status_by_year': status_by_year,
         'audit_stats': audit_stats,
         'audit_by_year': audit_by_year,
         'monthly_stats': monthly_stats,
-        'monthly_by_year': monthly_by_year
+        'monthly_by_year': monthly_by_year,
+        'monthly_stats_no_draft': monthly_stats_no_draft,
+        'monthly_by_year_no_draft': monthly_by_year_no_draft
     }
     
     return result
