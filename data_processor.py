@@ -47,6 +47,16 @@ def process_ticket_data(excel_file):
         'data': dept_counts.values.tolist()
     }
     
+    # 1.1 按年度分组的部门统计
+    dept_by_year = {}
+    for year in df['年份'].dropna().unique():
+        year_data = df[df['年份'] == year]
+        year_dept_counts = year_data['所在部门'].value_counts().head(10)
+        dept_by_year[str(int(year))] = {
+            'labels': year_dept_counts.index.tolist(),
+            'data': year_dept_counts.values.tolist()
+        }
+    
     # 2. 统计各系统勾选情况
     oa_count = len(df[df['OA系统'] == '勾选'])
     marketing_count = len(df[df['营销平台'] == '勾选'])
@@ -57,6 +67,19 @@ def process_ticket_data(excel_file):
         '营销平台': marketing_count,
         'U8C': u8c_count
     }
+    
+    # 2.1 按年度分组的系统统计
+    system_by_year = {}
+    for year in df['年份'].dropna().unique():
+        year_data = df[df['年份'] == year]
+        oa_year = len(year_data[year_data['OA系统'] == '勾选'])
+        marketing_year = len(year_data[year_data['营销平台'] == '勾选'])
+        u8c_year = len(year_data[year_data['U8C'] == '勾选'])
+        system_by_year[str(int(year))] = {
+            'OA系统': oa_year,
+            '营销平台': marketing_year,
+            'U8C': u8c_year
+        }
     
     # 3. 按年度统计工单数量
     year_counts = df['年份'].value_counts().sort_index()
@@ -72,12 +95,32 @@ def process_ticket_data(excel_file):
         'data': type_counts.values.tolist()
     }
     
+    # 4.1 按年度分组的工单类型统计
+    type_by_year = {}
+    for year in df['年份'].dropna().unique():
+        year_data = df[df['年份'] == year]
+        year_type_counts = year_data['工单类型'].value_counts()
+        type_by_year[str(int(year))] = {
+            'labels': year_type_counts.index.tolist(),
+            'data': year_type_counts.values.tolist()
+        }
+    
     # 5. 工单状态统计
     status_counts = df['流程状态'].value_counts()
     status_stats = {
         'labels': status_counts.index.tolist(),
         'data': status_counts.values.tolist()
     }
+    
+    # 5.1 按年度分组的工单状态统计
+    status_by_year = {}
+    for year in df['年份'].dropna().unique():
+        year_data = df[df['年份'] == year]
+        year_status_counts = year_data['流程状态'].value_counts()
+        status_by_year[str(int(year))] = {
+            'labels': year_status_counts.index.tolist(),
+            'data': year_status_counts.values.tolist()
+        }
     
     # 6. 月度趋势分析
     df['年月'] = df['创建日期'].dt.to_period('M')
@@ -86,6 +129,17 @@ def process_ticket_data(excel_file):
         'labels': [str(period) for period in monthly_counts.index if pd.notna(period)],
         'data': [int(count) for period, count in monthly_counts.items() if pd.notna(period)]
     }
+    
+    # 6.1 按年度分组的月度趋势分析
+    monthly_by_year = {}
+    for year in df['年份'].dropna().unique():
+        year_data = df[df['年份'] == year]
+        year_data['年月'] = year_data['创建日期'].dt.to_period('M')
+        year_monthly_counts = year_data['年月'].value_counts().sort_index()
+        monthly_by_year[str(int(year))] = {
+            'labels': [str(period) for period in year_monthly_counts.index if pd.notna(period)],
+            'data': [int(count) for period, count in year_monthly_counts.items() if pd.notna(period)]
+        }
     
     # 汇总所有统计数据
     result = {
@@ -98,11 +152,16 @@ def process_ticket_data(excel_file):
             }
         },
         'dept_top10': dept_top10,
+        'dept_by_year': dept_by_year,
         'system_stats': system_stats,
+        'system_by_year': system_by_year,
         'year_stats': year_stats,
         'type_stats': type_stats,
+        'type_by_year': type_by_year,
         'status_stats': status_stats,
-        'monthly_stats': monthly_stats
+        'status_by_year': status_by_year,
+        'monthly_stats': monthly_stats,
+        'monthly_by_year': monthly_by_year
     }
     
     return result

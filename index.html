@@ -60,6 +60,12 @@
                 <div class="chart-header">
                     <h2>🏆 部门工单数量 TOP 10</h2>
                     <p>各部门提交工单数量排名</p>
+                    <div class="chart-filter">
+                        <label for="dept-year-filter">年度：</label>
+                        <select id="dept-year-filter" class="year-filter">
+                            <option value="all">全部年份</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="deptChart"></canvas>
@@ -71,6 +77,12 @@
                 <div class="chart-header">
                     <h2>💻 系统使用统计</h2>
                     <p>OA系统、营销平台、U8C勾选情况</p>
+                    <div class="chart-filter">
+                        <label for="system-year-filter">年度：</label>
+                        <select id="system-year-filter" class="year-filter">
+                            <option value="all">全部年份</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="systemChart"></canvas>
@@ -93,6 +105,12 @@
                 <div class="chart-header">
                     <h2>📊 工单类型分布</h2>
                     <p>不同类型工单的数量分布</p>
+                    <div class="chart-filter">
+                        <label for="type-year-filter">年度：</label>
+                        <select id="type-year-filter" class="year-filter">
+                            <option value="all">全部年份</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="typeChart"></canvas>
@@ -104,6 +122,12 @@
                 <div class="chart-header">
                     <h2>⚡ 工单状态统计</h2>
                     <p>工单处理状态分布情况</p>
+                    <div class="chart-filter">
+                        <label for="status-year-filter">年度：</label>
+                        <select id="status-year-filter" class="year-filter">
+                            <option value="all">全部年份</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="statusChart"></canvas>
@@ -115,6 +139,12 @@
                 <div class="chart-header">
                     <h2>📅 月度工单趋势</h2>
                     <p>按月份统计的工单提交趋势</p>
+                    <div class="chart-filter">
+                        <label for="monthly-year-filter">年度：</label>
+                        <select id="monthly-year-filter" class="year-filter">
+                            <option value="all">全部年份</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="monthlyChart"></canvas>

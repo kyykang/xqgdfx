@@ -173,6 +173,40 @@ body {
     font-size: 0.9rem;
 }
 
+.chart-filter {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-filter label {
+    font-size: 0.85rem;
+    color: #5a6c7d;
+    font-weight: 500;
+}
+
+.chart-filter select {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.chart-filter select:hover {
+    border-color: #667eea;
+}
+
+.chart-filter select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
 .chart-wrapper {
     padding: 25px;
     height: 400px;

@@ -49,25 +49,44 @@ async function loadData() {
 function initializePage() {
     // 更新概览卡片
     document.getElementById('total-tickets').textContent = ticketData.summary.total_tickets.toLocaleString();
-    document.getElementById('total-departments').textContent = ticketData.summary.total_departments;
-    document.getElementById('date-range').textContent = `${ticketData.summary.date_range.start} 至 ${ticketData.summary.date_range.end}`;
+    document.getElementById('total-departments').textContent = ticketData.summary.total_departments.toLocaleString();
+    document.getElementById('date-range').textContent = 
+        `${ticketData.summary.date_range.start} 至 ${ticketData.summary.date_range.end}`;
     
-    // 初始化年份筛选器
+    // 初始化全局年度筛选器
     const yearFilter = document.getElementById('year-filter');
-    const years = ticketData.year_stats.labels.slice().reverse();
-    
+    const years = ticketData.year_stats.labels;
     years.forEach(year => {
         const option = document.createElement('option');
         option.value = year;
-        option.textContent = `${year}年`;
+        option.textContent = year + '年';
         yearFilter.appendChild(option);
     });
     
-    // 更新时间
-    document.getElementById('update-time').textContent = new Date().toLocaleString('zh-CN');
+    // 初始化各个图表的年度筛选器
+    initializeYearFilters();
     
     // 初始显示统计
-    updateFilteredStats('all');
+    document.getElementById('filtered-count').textContent = 
+        `显示全部 ${ticketData.summary.total_tickets.toLocaleString()} 张工单`;
+}
+
+// 初始化各个图表的年度筛选器
+function initializeYearFilters() {
+    const filterIds = ['dept-year-filter', 'system-year-filter', 'type-year-filter', 'status-year-filter', 'monthly-year-filter'];
+    const years = ticketData.year_stats.labels;
+    
+    filterIds.forEach(filterId => {
+        const filter = document.getElementById(filterId);
+        if (filter) {
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year + '年';
+                filter.appendChild(option);
+            });
+        }
+    });
 }
 
 // 初始化所有图表
@@ -82,11 +101,33 @@ function initializeCharts() {
 
 // 设置事件监听器
 function setupEventListeners() {
+    // 全局年度筛选器
     const yearFilter = document.getElementById('year-filter');
     yearFilter.addEventListener('change', function() {
         const selectedYear = this.value;
         updateFilteredStats(selectedYear);
         updateChartsForYear(selectedYear);
+    });
+    
+    // 各个图表的年度筛选器
+    document.getElementById('dept-year-filter').addEventListener('change', function() {
+        updateDepartmentChart(this.value);
+    });
+    
+    document.getElementById('system-year-filter').addEventListener('change', function() {
+        updateSystemChart(this.value);
+    });
+    
+    document.getElementById('type-year-filter').addEventListener('change', function() {
+        updateTypeChart(this.value);
+    });
+    
+    document.getElementById('status-year-filter').addEventListener('change', function() {
+        updateStatusChart(this.value);
+    });
+    
+    document.getElementById('monthly-year-filter').addEventListener('change', function() {
+        updateMonthlyChart(this.value);
     });
 }
 
@@ -103,10 +144,22 @@ function updateFilteredStats(year) {
     }
 }
 
-// 根据年份更新图表
+// 根据年份更新所有图表
 function updateChartsForYear(year) {
-    // 这里可以根据需要实现年份筛选功能
-    // 目前保持原有图表显示
+    updateDepartmentChart(year);
+    updateSystemChart(year);
+    updateTypeChart(year);
+    updateStatusChart(year);
+    updateMonthlyChart(year);
+    
+    // 同步各个图表的筛选器
+    const filterIds = ['dept-year-filter', 'system-year-filter', 'type-year-filter', 'status-year-filter', 'monthly-year-filter'];
+    filterIds.forEach(filterId => {
+        const filter = document.getElementById(filterId);
+        if (filter) {
+            filter.value = year;
+        }
+    });
 }
 
 // 创建部门TOP10图表
@@ -123,8 +176,8 @@ function createDepartmentChart() {
                 data: deptData.data,
                 backgroundColor: chartColors.slice(0, deptData.labels.length),
                 borderColor: chartColors.slice(0, deptData.labels.length),
-                borderWidth: 2,
-                borderRadius: 8,
+                borderWidth: 1,
+                borderRadius: 6,
                 borderSkipped: false
             }]
         },
@@ -137,14 +190,14 @@ function createDepartmentChart() {
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: 'white',
-                    bodyColor: 'white',
-                    borderColor: colors.primary,
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#667eea',
                     borderWidth: 1,
                     cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
-                            return `工单数量: ${context.parsed.y.toLocaleString()}`;
+                            return `${context.parsed.y} 张工单`;
                         }
                     }
                 }
@@ -173,7 +226,25 @@ function createDepartmentChart() {
     });
 }
 
-// 创建系统使用统计图表
+// 更新部门图表
+function updateDepartmentChart(year) {
+    if (!charts.department) return;
+    
+    let data;
+    if (year === 'all') {
+        data = ticketData.dept_top10;
+    } else {
+        data = ticketData.dept_by_year[year] || { labels: [], data: [] };
+    }
+    
+    charts.department.data.labels = data.labels;
+    charts.department.data.datasets[0].data = data.data;
+    charts.department.data.datasets[0].backgroundColor = chartColors.slice(0, data.labels.length);
+    charts.department.data.datasets[0].borderColor = chartColors.slice(0, data.labels.length);
+    charts.department.update();
+}
+
+// 创建系统统计图表
 function createSystemChart() {
     const ctx = document.getElementById('systemChart').getContext('2d');
     const systemData = ticketData.system_stats;
@@ -181,13 +252,13 @@ function createSystemChart() {
     charts.system = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['OA系统', '营销平台', 'U8C'],
+            labels: Object.keys(systemData),
             datasets: [{
-                data: [systemData.OA系统, systemData.营销平台, systemData.U8C],
+                data: Object.values(systemData),
                 backgroundColor: [colors.primary, colors.success, colors.warning],
-                borderColor: ['white', 'white', 'white'],
+                borderColor: '#fff',
                 borderWidth: 3,
-                hoverOffset: 10
+                hoverBorderWidth: 4
             }]
         },
         options: {
@@ -199,50 +270,65 @@ function createSystemChart() {
                     labels: {
                         padding: 20,
                         usePointStyle: true,
-                        font: {
-                            size: 12
-                        }
+                        color: '#666'
                     }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: 'white',
-                    bodyColor: 'white',
-                    borderColor: colors.primary,
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#667eea',
                     borderWidth: 1,
                     cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.parsed.toLocaleString()} (${percentage}%)`;
+                            return `${context.label}: ${context.parsed} 个 (${percentage}%)`;
                         }
                     }
                 }
-            }
+            },
+            cutout: '60%'
         }
     });
+}
+
+// 更新系统图表
+function updateSystemChart(year) {
+    if (!charts.system) return;
+    
+    let data;
+    if (year === 'all') {
+        data = ticketData.system_stats;
+    } else {
+        data = ticketData.system_by_year[year] || { 'OA系统': 0, '营销平台': 0, 'U8C': 0 };
+    }
+    
+    charts.system.data.labels = Object.keys(data);
+    charts.system.data.datasets[0].data = Object.values(data);
+    charts.system.update();
 }
 
 // 创建年度趋势图表
 function createYearChart() {
     const ctx = document.getElementById('yearChart').getContext('2d');
-    const yearlyData = ticketData.year_stats;
+    const yearData = ticketData.year_stats;
     
     charts.year = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: yearlyData.labels.map(year => `${year}年`),
+            labels: yearData.labels,
             datasets: [{
                 label: '工单数量',
-                data: yearlyData.data,
+                data: yearData.data,
                 borderColor: colors.primary,
                 backgroundColor: colors.primary + '20',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
                 pointBackgroundColor: colors.primary,
-                pointBorderColor: 'white',
+                pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 6,
                 pointHoverRadius: 8
@@ -257,14 +343,14 @@ function createYearChart() {
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: 'white',
-                    bodyColor: 'white',
-                    borderColor: colors.primary,
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#667eea',
                     borderWidth: 1,
                     cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
-                            return `工单数量: ${context.parsed.y.toLocaleString()}`;
+                            return `${context.parsed.y} 张工单`;
                         }
                     }
                 }
@@ -292,7 +378,7 @@ function createYearChart() {
     });
 }
 
-// 创建工单类型分布图表
+// 创建工单类型图表
 function createTypeChart() {
     const ctx = document.getElementById('typeChart').getContext('2d');
     const typeData = ticketData.type_stats;
@@ -304,9 +390,9 @@ function createTypeChart() {
             datasets: [{
                 data: typeData.data,
                 backgroundColor: chartColors.slice(0, typeData.labels.length),
-                borderColor: 'white',
+                borderColor: '#fff',
                 borderWidth: 2,
-                hoverOffset: 8
+                hoverBorderWidth: 3
             }]
         },
         options: {
@@ -318,23 +404,21 @@ function createTypeChart() {
                     labels: {
                         padding: 15,
                         usePointStyle: true,
-                        font: {
-                            size: 11
-                        }
+                        color: '#666'
                     }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: 'white',
-                    bodyColor: 'white',
-                    borderColor: colors.primary,
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#667eea',
                     borderWidth: 1,
                     cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.parsed.toLocaleString()} (${percentage}%)`;
+                            return `${context.label}: ${context.parsed} 个 (${percentage}%)`;
                         }
                     }
                 }
@@ -343,7 +427,24 @@ function createTypeChart() {
     });
 }
 
-// 创建工单状态统计图表
+// 更新工单类型图表
+function updateTypeChart(year) {
+    if (!charts.type) return;
+    
+    let data;
+    if (year === 'all') {
+        data = ticketData.type_stats;
+    } else {
+        data = ticketData.type_by_year[year] || { labels: [], data: [] };
+    }
+    
+    charts.type.data.labels = data.labels;
+    charts.type.data.datasets[0].data = data.data;
+    charts.type.data.datasets[0].backgroundColor = chartColors.slice(0, data.labels.length);
+    charts.type.update();
+}
+
+// 创建工单状态图表
 function createStatusChart() {
     const ctx = document.getElementById('statusChart').getContext('2d');
     const statusData = ticketData.status_stats;
@@ -355,75 +456,9 @@ function createStatusChart() {
             datasets: [{
                 label: '工单数量',
                 data: statusData.data,
-                backgroundColor: [colors.success, colors.warning, colors.danger, colors.info],
-                borderColor: [colors.success, colors.warning, colors.danger, colors.info],
-                borderWidth: 2,
-                borderRadius: 8,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: 'white',
-                    bodyColor: 'white',
-                    borderColor: colors.primary,
-                    borderWidth: 1,
-                    cornerRadius: 8,
-                    callbacks: {
-                        label: function(context) {
-                            return `工单数量: ${context.parsed.y.toLocaleString()}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
-                    },
-                    ticks: {
-                        color: '#666'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#666'
-                    }
-                }
-            }
-        }
-    });
-}
-
-// 创建月度趋势图表
-function createMonthlyChart() {
-    const ctx = document.getElementById('monthlyChart').getContext('2d');
-    const monthlyData = ticketData.monthly_stats;
-    
-    charts.monthly = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: monthlyData.labels.map(month => {
-                const [year, monthNum] = month.split('-');
-                return `${year}年${monthNum}月`;
-            }),
-            datasets: [{
-                label: '工单数量',
-                data: monthlyData.data,
-                backgroundColor: colors.secondary + '80',
-                borderColor: colors.secondary,
-                borderWidth: 2,
+                backgroundColor: chartColors.slice(0, statusData.labels.length),
+                borderColor: chartColors.slice(0, statusData.labels.length),
+                borderWidth: 1,
                 borderRadius: 6,
                 borderSkipped: false
             }]
@@ -437,14 +472,14 @@ function createMonthlyChart() {
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: 'white',
-                    bodyColor: 'white',
-                    borderColor: colors.primary,
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#667eea',
                     borderWidth: 1,
                     cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
-                            return `工单数量: ${context.parsed.y.toLocaleString()}`;
+                            return `${context.parsed.y} 张工单`;
                         }
                     }
                 }
@@ -465,11 +500,7 @@ function createMonthlyChart() {
                     },
                     ticks: {
                         color: '#666',
-                        maxRotation: 45,
-                        callback: function(value, index) {
-                            // 只显示部分标签以避免拥挤
-                            return index % 3 === 0 ? this.getLabelForValue(value) : '';
-                        }
+                        maxRotation: 45
                     }
                 }
             }
@@ -477,21 +508,121 @@ function createMonthlyChart() {
     });
 }
 
+// 更新工单状态图表
+function updateStatusChart(year) {
+    if (!charts.status) return;
+    
+    let data;
+    if (year === 'all') {
+        data = ticketData.status_stats;
+    } else {
+        data = ticketData.status_by_year[year] || { labels: [], data: [] };
+    }
+    
+    charts.status.data.labels = data.labels;
+    charts.status.data.datasets[0].data = data.data;
+    charts.status.data.datasets[0].backgroundColor = chartColors.slice(0, data.labels.length);
+    charts.status.data.datasets[0].borderColor = chartColors.slice(0, data.labels.length);
+    charts.status.update();
+}
+
+// 创建月度趋势图表
+function createMonthlyChart() {
+    const ctx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyData = ticketData.monthly_stats;
+    
+    charts.monthly = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthlyData.labels,
+            datasets: [{
+                label: '工单数量',
+                data: monthlyData.data,
+                borderColor: colors.success,
+                backgroundColor: colors.success + '20',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: colors.success,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#2ecc71',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.parsed.y} 张工单`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#666'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#666',
+                        maxRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 更新月度趋势图表
+function updateMonthlyChart(year) {
+    if (!charts.monthly) return;
+    
+    let data;
+    if (year === 'all') {
+        data = ticketData.monthly_stats;
+    } else {
+        data = ticketData.monthly_by_year[year] || { labels: [], data: [] };
+    }
+    
+    charts.monthly.data.labels = data.labels;
+    charts.monthly.data.datasets[0].data = data.data;
+    charts.monthly.update();
+}
+
 // 显示错误信息
 function showError(message) {
-    const container = document.querySelector('.container');
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error-message';
     errorDiv.innerHTML = `
-        <div style="background: #e74c3c; color: white; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
-            <h3>⚠️ 错误</h3>
-            <p>${message}</p>
-        </div>
+        <h3>⚠️ 错误</h3>
+        <p>${message}</p>
     `;
-    container.appendChild(errorDiv);
+    document.body.appendChild(errorDiv);
 }
 
-// 窗口大小改变时重新调整图表
+// 响应式处理
 window.addEventListener('resize', function() {
     Object.values(charts).forEach(chart => {
         if (chart) {
