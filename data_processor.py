@@ -243,6 +243,19 @@ def process_ticket_data(excel_file):
             'data': [int(count) for period, count in year_monthly_counts.items() if pd.notna(period)]
         }
     
+    # 7. 获取未结束工单的详细信息
+    unfinished_tickets = df[df['流程状态'] == '未结束'][['流水号', '需求内容', '申请人', '所在部门', '创建日期', '工单类型']].copy()
+    # 转换日期格式为字符串，便于JSON序列化
+    unfinished_tickets['创建日期'] = unfinished_tickets['创建日期'].dt.strftime('%Y-%m-%d')
+    unfinished_tickets_list = unfinished_tickets.to_dict('records')
+    
+    # 按年度分组的未结束工单详细信息
+    unfinished_by_year = {}
+    for year in df['年份'].dropna().unique():
+        year_unfinished = df[(df['年份'] == year) & (df['流程状态'] == '未结束')][['流水号', '需求内容', '申请人', '所在部门', '创建日期', '工单类型']].copy()
+        year_unfinished['创建日期'] = year_unfinished['创建日期'].dt.strftime('%Y-%m-%d')
+        unfinished_by_year[str(int(year))] = year_unfinished.to_dict('records')
+    
     # 汇总所有统计数据
     result = {
         'summary': {
@@ -274,7 +287,9 @@ def process_ticket_data(excel_file):
         'monthly_stats': monthly_stats,
         'monthly_by_year': monthly_by_year,
         'monthly_stats_no_draft': monthly_stats_no_draft,
-        'monthly_by_year_no_draft': monthly_by_year_no_draft
+        'monthly_by_year_no_draft': monthly_by_year_no_draft,
+        'unfinished_tickets': unfinished_tickets_list,
+        'unfinished_by_year': unfinished_by_year
     }
     
     return result

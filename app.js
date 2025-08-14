@@ -537,6 +537,17 @@ function createStatusChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: function(event, elements) {
+                if (elements.length > 0) {
+                    const elementIndex = elements[0].index;
+                    const label = statusData.labels[elementIndex];
+                    
+                    // 如果点击的是"未结束"状态，跳转到详情页面
+                    if (label === '未结束') {
+                        window.open('details.html', '_blank');
+                    }
+                }
+            },
             plugins: {
                 legend: {
                     display: false
@@ -550,7 +561,13 @@ function createStatusChart() {
                     cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
-                            return `${context.parsed.y} 张工单`;
+                            const label = context.label;
+                            const value = context.parsed.y;
+                            let tooltip = `${value} 张工单`;
+                            if (label === '未结束') {
+                                tooltip += ' (点击查看详情)';
+                            }
+                            return tooltip;
                         }
                     }
                 }
@@ -631,6 +648,31 @@ function updateStatusChart(year) {
     charts.status.data.datasets[0].data = filteredData;
     charts.status.data.datasets[0].backgroundColor = chartColors.slice(0, filteredLabels.length);
     charts.status.data.datasets[0].borderColor = chartColors.slice(0, filteredLabels.length);
+    
+    // 重新设置点击事件
+    charts.status.options.onClick = function(event, elements) {
+        if (elements.length > 0) {
+            const elementIndex = elements[0].index;
+            const label = filteredLabels[elementIndex];
+            
+            // 如果点击的是"未结束"状态，跳转到详情页面
+            if (label === '未结束') {
+                window.open('details.html', '_blank');
+            }
+        }
+    };
+    
+    // 重新设置tooltip
+    charts.status.options.plugins.tooltip.callbacks.label = function(context) {
+        const label = context.label;
+        const value = context.parsed.y;
+        let tooltip = `${value} 张工单`;
+        if (label === '未结束') {
+            tooltip += ' (点击查看详情)';
+        }
+        return tooltip;
+    };
+    
     charts.status.update();
 }
 
