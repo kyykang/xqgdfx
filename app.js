@@ -98,6 +98,14 @@ function initializeCharts() {
     createTypeChart();
     createStatusChart();
     createMonthlyChart();
+    
+    // 由于默认选中排除草稿，需要更新所有图表显示排除草稿的数据
+    updateDepartmentChart('all');
+    updateSystemChart('all');
+    updateYearChart();
+    updateTypeChart('all');
+    updateStatusChart('all');
+    updateMonthlyChart('all');
 }
 
 // 设置事件监听器
