@@ -164,6 +164,7 @@
                 <div class="stat-item">
                     <strong id="filtered-count">0</strong> 张当前显示
                 </div>
+
             </div>
         </div>
         
@@ -201,10 +202,13 @@
             try {
                 const response = await fetch('ticket_data.json');
                 ticketData = await response.json();
+
                 initializePage();
+                return Promise.resolve();
             } catch (error) {
-                console.error('数据加载失败:', error);
+
                 alert('数据加载失败，请检查数据文件是否存在');
+                return Promise.reject(error);
             }
         }
         
@@ -228,9 +232,15 @@
             });
             
             // 排除草稿复选框事件监听器
-            document.getElementById('exclude-draft').addEventListener('change', function() {
-                displayTickets();
-            });
+            const excludeDraftCheckbox = document.getElementById('exclude-draft');
+            if (excludeDraftCheckbox) {
+                excludeDraftCheckbox.addEventListener('change', function() {
+    
+                    displayTickets();
+                });
+                // 确保初始状态正确
+                excludeDraftCheckbox.checked = true;
+            }
             
             // 显示工单数据
             displayTickets();
@@ -241,25 +251,38 @@
             const tbody = document.getElementById('tickets-tbody');
             const totalCountElement = document.getElementById('total-count');
             const filteredCountElement = document.getElementById('filtered-count');
-            const excludeDraft = document.getElementById('exclude-draft').checked;
-            
-            let tickets;
-            if (currentYear === 'all') {
-                tickets = ticketData.unfinished_tickets || [];
-            } else {
-                tickets = ticketData.unfinished_by_year[currentYear] || [];
+            // 确保数据已加载
+            if (!ticketData || !ticketData.unfinished_tickets) {
+                return;
             }
             
-            // 如果选择排除草稿，过滤掉草稿状态的工单
+            // 获取复选框状态
+            const excludeDraft = document.getElementById('exclude-draft').checked;
+            
+            // 获取工单数据
+            let tickets;
+            if (currentYear === 'all') {
+                tickets = [...(ticketData.unfinished_tickets || [])];
+            } else {
+                tickets = [...(ticketData.unfinished_by_year[currentYear] || [])];
+            }
+            
+            const originalCount = tickets.length;
+            
+            // 过滤草稿
             if (excludeDraft) {
                 tickets = tickets.filter(ticket => ticket.审核状态 !== '草稿');
             }
             
             // 更新统计信息
-            const totalUnfinished = ticketData.unfinished_tickets.length;
-            const totalNoDraft = excludeDraft ? ticketData.unfinished_tickets.filter(t => t.审核状态 !== '草稿').length : totalUnfinished;
-            totalCountElement.textContent = excludeDraft ? totalNoDraft : totalUnfinished;
+            const allTickets = ticketData.unfinished_tickets || [];
+            const totalDrafts = allTickets.filter(t => t.审核状态 === '草稿').length;
+            
+            totalCountElement.textContent = excludeDraft ? 
+                (allTickets.length - totalDrafts) : allTickets.length;
             filteredCountElement.textContent = tickets.length;
+            
+
             
             // 清空表格
             tbody.innerHTML = '';
@@ -287,8 +310,12 @@
             }
         }
         
+
+        
         // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', loadData);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
     </script>
 </body>
 </html>
