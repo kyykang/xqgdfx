@@ -90,10 +90,14 @@
         
         .filter-section {
             background: white;
-            padding: 15px 20px;
+            padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         
         .filter-section select {
@@ -101,6 +105,22 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             margin-left: 10px;
+        }
+        
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .filter-checkbox input[type="checkbox"] {
+            margin: 0;
+        }
+        
+        .filter-checkbox label {
+            margin: 0;
+            font-size: 14px;
+            color: #555;
         }
         
         .stats-info {
@@ -132,6 +152,11 @@
                 <option value="all">全部年份</option>
             </select>
             
+            <div class="filter-checkbox">
+                <input type="checkbox" id="exclude-draft" checked>
+                <label for="exclude-draft">排除草稿</label>
+            </div>
+            
             <div class="stats-info">
                 <div class="stat-item">
                     <strong id="total-count">0</strong> 张未结束工单
@@ -155,6 +180,7 @@
                             <th>所在部门</th>
                             <th>创建日期</th>
                             <th>工单类型</th>
+                            <th>审核状态</th>
                             <th>需求内容</th>
                         </tr>
                     </thead>
@@ -201,6 +227,11 @@
                 displayTickets();
             });
             
+            // 排除草稿复选框事件监听器
+            document.getElementById('exclude-draft').addEventListener('change', function() {
+                displayTickets();
+            });
+            
             // 显示工单数据
             displayTickets();
         }
@@ -210,6 +241,7 @@
             const tbody = document.getElementById('tickets-tbody');
             const totalCountElement = document.getElementById('total-count');
             const filteredCountElement = document.getElementById('filtered-count');
+            const excludeDraft = document.getElementById('exclude-draft').checked;
             
             let tickets;
             if (currentYear === 'all') {
@@ -218,8 +250,15 @@
                 tickets = ticketData.unfinished_by_year[currentYear] || [];
             }
             
+            // 如果选择排除草稿，过滤掉草稿状态的工单
+            if (excludeDraft) {
+                tickets = tickets.filter(ticket => ticket.审核状态 !== '草稿');
+            }
+            
             // 更新统计信息
-            totalCountElement.textContent = ticketData.unfinished_tickets.length;
+            const totalUnfinished = ticketData.unfinished_tickets.length;
+            const totalNoDraft = excludeDraft ? ticketData.unfinished_tickets.filter(t => t.审核状态 !== '草稿').length : totalUnfinished;
+            totalCountElement.textContent = excludeDraft ? totalNoDraft : totalUnfinished;
             filteredCountElement.textContent = tickets.length;
             
             // 清空表格
@@ -234,6 +273,7 @@
                     <td>${ticket.所在部门 || '-'}</td>
                     <td>${ticket.创建日期 || '-'}</td>
                     <td>${ticket.工单类型 || '-'}</td>
+                    <td>${ticket.审核状态 || '-'}</td>
                     <td class="ticket-content" title="${ticket.需求内容 || '-'}">${ticket.需求内容 || '-'}</td>
                 `;
                 tbody.appendChild(row);
@@ -242,7 +282,7 @@
             // 如果没有数据，显示提示
             if (tickets.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="6" style="text-align: center; color: #666; padding: 40px;">暂无未结束工单数据</td>';
+                row.innerHTML = '<td colspan="7" style="text-align: center; color: #666; padding: 40px;">暂无未结束工单数据</td>';
                 tbody.appendChild(row);
             }
         }
