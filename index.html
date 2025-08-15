@@ -87,7 +87,7 @@
             <!-- 部门TOP10图表 -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h2>🏆 部门工单数量 TOP 10</h2>
+                    <h2 id="dept-title" style="cursor: pointer; transition: color 0.3s;" title="点击查看所有部门详情">🏆 部门工单数量 TOP 10</h2>
                     <p>各部门提交工单数量排名</p>
                     <div class="chart-filter">
                         <label for="dept-year-filter">年度：</label>
@@ -211,6 +211,42 @@
         <footer class="footer">
             <p>© 2024 需求工单分析系统 | 数据更新时间: <span id="update-time"></span></p>
         </footer>
+    </div>
+
+    <!-- 部门详情模态框 -->
+    <div id="dept-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 所有部门工单统计</h3>
+                <span class="close" id="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-filters">
+                    <label for="modal-year-filter">年度：</label>
+                    <select id="modal-year-filter">
+                        <option value="all">全部年份</option>
+                    </select>
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="modal-exclude-draft" checked>
+                        <label for="modal-exclude-draft">排除草稿</label>
+                    </div>
+                </div>
+                <div class="dept-list-container">
+                    <table class="dept-table">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>部门名称</th>
+                                <th>工单数量</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dept-table-body">
+                            <!-- 部门数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>

@@ -173,6 +173,39 @@ function setupEventListeners() {
         const yearFilter = document.getElementById('monthly-year-filter');
         updateMonthlyChart(yearFilter.value);
     });
+    
+    // 部门标题点击事件
+    document.getElementById('dept-title').addEventListener('click', function() {
+        showDepartmentModal();
+    });
+    
+    // 模态框关闭事件
+    document.getElementById('close-modal').addEventListener('click', function() {
+        hideDepartmentModal();
+    });
+    
+    // 点击模态框外部关闭
+    document.getElementById('dept-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideDepartmentModal();
+        }
+    });
+    
+    // 模态框内的筛选器事件
+    document.getElementById('modal-year-filter').addEventListener('change', function() {
+        updateDepartmentModalData();
+    });
+    
+    document.getElementById('modal-exclude-draft').addEventListener('change', function() {
+        updateDepartmentModalData();
+    });
+    
+    // ESC键关闭模态框
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideDepartmentModal();
+        }
+    });
 }
 
 // 更新筛选统计信息
@@ -939,4 +972,121 @@ function showUploadError(message) {
     setTimeout(() => {
         uploadStatus.style.display = 'none';
     }, 5000);
+}
+
+// 显示部门详情模态框
+function showDepartmentModal() {
+    const modal = document.getElementById('dept-modal');
+    
+    // 初始化模态框的年度筛选器
+    initializeModalYearFilter();
+    
+    // 显示模态框
+    modal.style.display = 'block';
+    
+    // 加载部门数据
+    updateDepartmentModalData();
+    
+    // 防止背景滚动
+    document.body.style.overflow = 'hidden';
+}
+
+// 隐藏部门详情模态框
+function hideDepartmentModal() {
+    const modal = document.getElementById('dept-modal');
+    modal.style.display = 'none';
+    
+    // 恢复背景滚动
+    document.body.style.overflow = 'auto';
+}
+
+// 初始化模态框的年度筛选器
+function initializeModalYearFilter() {
+    const modalYearFilter = document.getElementById('modal-year-filter');
+    
+    // 清空现有选项
+    modalYearFilter.innerHTML = '<option value="all">全部年份</option>';
+    
+    // 添加年份选项
+    if (ticketData && ticketData.dept_by_year) {
+        const years = Object.keys(ticketData.dept_by_year).sort();
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year + '年';
+            modalYearFilter.appendChild(option);
+        });
+    }
+}
+
+// 更新模态框中的部门数据
+function updateDepartmentModalData() {
+    if (!ticketData) return;
+    
+    const year = document.getElementById('modal-year-filter').value;
+    const excludeDraft = document.getElementById('modal-exclude-draft').checked;
+    const tableBody = document.getElementById('dept-table-body');
+    
+    // 获取完整的部门数据
+    let allDeptData = getAllDepartmentData(year, excludeDraft);
+    
+    // 清空表格
+    tableBody.innerHTML = '';
+    
+    // 填充数据
+    allDeptData.forEach((dept, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${dept.name}</td>
+            <td>${dept.count}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // 如果没有数据，显示提示
+    if (allDeptData.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="3" style="text-align: center; color: #666; padding: 40px;">暂无部门数据</td>';
+        tableBody.appendChild(row);
+    }
+}
+
+// 获取所有部门数据（完整列表，按工单数量排序）
+function getAllDepartmentData(year, excludeDraft) {
+    if (!ticketData) return [];
+    
+    let deptCounts = {};
+    
+    if (year === 'all') {
+        // 使用全部年份的数据
+        const sourceData = excludeDraft ? ticketData.dept_top10_no_draft : ticketData.dept_top10;
+        
+        // 从原始数据中统计所有部门（不仅仅是TOP10）
+        // 这里我们需要从年度数据中汇总所有部门
+        const yearData = excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year;
+        
+        Object.values(yearData).forEach(yearDeptData => {
+            yearDeptData.labels.forEach((label, index) => {
+                deptCounts[label] = (deptCounts[label] || 0) + yearDeptData.data[index];
+            });
+        });
+    } else {
+        // 使用指定年份的数据
+        const sourceData = excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year;
+        const yearData = sourceData[year];
+        
+        if (yearData) {
+            yearData.labels.forEach((label, index) => {
+                deptCounts[label] = yearData.data[index];
+            });
+        }
+    }
+    
+    // 转换为数组并按数量排序
+    const sortedDepts = Object.entries(deptCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+    
+    return sortedDepts;
 }
