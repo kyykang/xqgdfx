@@ -62,6 +62,13 @@
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #eee;
+            min-width: 80px; /* 确保列有最小宽度 */
+        }
+        
+        /* 审核状态列样式 */
+        th:nth-child(6), td:nth-child(6) {
+            min-width: 100px;
+            white-space: nowrap;
         }
         
         th {
@@ -86,6 +93,35 @@
         .ticket-content:hover {
             white-space: normal;
             word-wrap: break-word;
+        }
+        
+        /* 审核状态样式 */
+        .audit-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .status-draft {
+            background: #ffeaa7;
+            color: #d63031;
+            border: 1px solid #fdcb6e;
+        }
+        
+        .status-pending {
+            background: #74b9ff;
+            color: white;
+            border: 1px solid #0984e3;
+        }
+        
+        .status-default {
+            background: #ddd;
+            color: #666;
+            border: 1px solid #bbb;
         }
         
         .filter-section {
@@ -290,13 +326,19 @@
             // 添加工单行
             tickets.forEach(ticket => {
                 const row = document.createElement('tr');
+                
+                // 为审核状态添加样式
+                const auditStatus = ticket.审核状态 || '-';
+                const statusClass = auditStatus === '草稿' ? 'status-draft' : 
+                                  auditStatus === '未审核' ? 'status-pending' : 'status-default';
+                
                 row.innerHTML = `
                     <td>${ticket.流水号 || '-'}</td>
                     <td>${ticket.申请人 || '-'}</td>
                     <td>${ticket.所在部门 || '-'}</td>
                     <td>${ticket.创建日期 || '-'}</td>
                     <td>${ticket.工单类型 || '-'}</td>
-                    <td>${ticket.审核状态 || '-'}</td>
+                    <td><span class="audit-status ${statusClass}">${auditStatus}</span></td>
                     <td class="ticket-content" title="${ticket.需求内容 || '-'}">${ticket.需求内容 || '-'}</td>
                 `;
                 tbody.appendChild(row);
