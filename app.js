@@ -1056,37 +1056,22 @@ function updateDepartmentModalData() {
 function getAllDepartmentData(year, excludeDraft) {
     if (!ticketData) return [];
     
-    let deptCounts = {};
+    let sourceData;
     
     if (year === 'all') {
-        // 使用全部年份的数据
-        const sourceData = excludeDraft ? ticketData.dept_top10_no_draft : ticketData.dept_top10;
-        
-        // 从原始数据中统计所有部门（不仅仅是TOP10）
-        // 这里我们需要从年度数据中汇总所有部门
-        const yearData = excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year;
-        
-        Object.values(yearData).forEach(yearDeptData => {
-            yearDeptData.labels.forEach((label, index) => {
-                deptCounts[label] = (deptCounts[label] || 0) + yearDeptData.data[index];
-            });
-        });
+        // 使用全部年份的完整数据
+        sourceData = excludeDraft ? ticketData.dept_all_no_draft : ticketData.dept_all;
     } else {
-        // 使用指定年份的数据
-        const sourceData = excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year;
-        const yearData = sourceData[year];
-        
-        if (yearData) {
-            yearData.labels.forEach((label, index) => {
-                deptCounts[label] = yearData.data[index];
-            });
-        }
+        // 使用指定年份的完整数据
+        const yearData = excludeDraft ? ticketData.dept_by_year_all_no_draft : ticketData.dept_by_year_all;
+        sourceData = yearData[year] || { labels: [], data: [] };
     }
     
-    // 转换为数组并按数量排序
-    const sortedDepts = Object.entries(deptCounts)
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count);
+    // 转换为数组格式
+    const sortedDepts = sourceData.labels.map((name, index) => ({
+        name: name,
+        count: sourceData.data[index]
+    }));
     
     return sortedDepts;
 }

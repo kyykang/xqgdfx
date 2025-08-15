@@ -68,14 +68,29 @@ def process_ticket_data(excel_file):
         'data': dept_counts.values.tolist()
     }
     
+    # 1.0 按部门统计工单数量（完整列表，用于模态框显示）
+    dept_counts_all = df['所在部门'].value_counts()
+    dept_all = {
+        'labels': dept_counts_all.index.tolist(),
+        'data': dept_counts_all.values.tolist()
+    }
+    
     # 1.1 按年度分组的部门统计
     dept_by_year = {}
+    dept_by_year_all = {}  # 完整的年度部门统计
     for year in df['年份'].dropna().unique():
         year_data = df[df['年份'] == year]
         year_dept_counts = year_data['所在部门'].value_counts().head(10)
         dept_by_year[str(int(year))] = {
             'labels': year_dept_counts.index.tolist(),
             'data': year_dept_counts.values.tolist()
+        }
+        
+        # 完整的年度部门统计（不限制数量）
+        year_dept_counts_all = year_data['所在部门'].value_counts()
+        dept_by_year_all[str(int(year))] = {
+            'labels': year_dept_counts_all.index.tolist(),
+            'data': year_dept_counts_all.values.tolist()
         }
     
     # 1.2 排除草稿的部门统计
@@ -86,14 +101,29 @@ def process_ticket_data(excel_file):
         'data': dept_counts_no_draft.values.tolist()
     }
     
+    # 1.2.1 排除草稿的部门统计（完整列表）
+    dept_counts_all_no_draft = df_no_draft['所在部门'].value_counts()
+    dept_all_no_draft = {
+        'labels': dept_counts_all_no_draft.index.tolist(),
+        'data': dept_counts_all_no_draft.values.tolist()
+    }
+    
     # 1.3 按年度分组的部门统计（排除草稿）
     dept_by_year_no_draft = {}
+    dept_by_year_all_no_draft = {}  # 完整的年度部门统计（排除草稿）
     for year in df_no_draft['年份'].dropna().unique():
         year_data = df_no_draft[df_no_draft['年份'] == year]
         year_dept_counts = year_data['所在部门'].value_counts().head(10)
         dept_by_year_no_draft[str(int(year))] = {
             'labels': year_dept_counts.index.tolist(),
             'data': year_dept_counts.values.tolist()
+        }
+        
+        # 完整的年度部门统计（排除草稿，不限制数量）
+        year_dept_counts_all = year_data['所在部门'].value_counts()
+        dept_by_year_all_no_draft[str(int(year))] = {
+            'labels': year_dept_counts_all.index.tolist(),
+            'data': year_dept_counts_all.values.tolist()
         }
     
     # 2. 统计各系统勾选情况
@@ -287,9 +317,13 @@ def process_ticket_data(excel_file):
             }
         },
         'dept_top10': dept_top10,
+        'dept_all': dept_all,  # 完整的部门统计
         'dept_by_year': dept_by_year,
+        'dept_by_year_all': dept_by_year_all,  # 完整的年度部门统计
         'dept_top10_no_draft': dept_top10_no_draft,
+        'dept_all_no_draft': dept_all_no_draft,  # 完整的部门统计（排除草稿）
         'dept_by_year_no_draft': dept_by_year_no_draft,
+        'dept_by_year_all_no_draft': dept_by_year_all_no_draft,  # 完整的年度部门统计（排除草稿）
         'system_stats': system_stats,
         'system_by_year': system_by_year,
         'system_stats_no_draft': system_stats_no_draft,
