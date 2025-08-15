@@ -127,7 +127,7 @@ function setupEventListeners() {
         if (selectedYear === 'all') {
             halfYearFilter.style.display = 'none';
             halfYearLabel.style.display = 'none';
-            halfYearFilter.value = 'full'; // 重置为全年
+            halfYearFilter.value = 'all'; // 重置为全年
         } else {
             halfYearFilter.style.display = 'inline-block';
             halfYearLabel.style.display = 'inline-block';
@@ -146,51 +146,208 @@ function setupEventListeners() {
     });
     
     // 各个图表的年度筛选器
-    document.getElementById('dept-year-filter').addEventListener('change', function() {
-        updateDepartmentChart(this.value);
-    });
+    const deptYearFilter = document.getElementById('dept-year-filter');
+    if (deptYearFilter) {
+        deptYearFilter.addEventListener('change', function() {
+            const selectedYear = this.value;
+            const halfYearFilter = document.getElementById('dept-half-year-filter');
+            const halfYearLabel = document.getElementById('dept-half-year-label');
+            
+            // 显示或隐藏半年度筛选器
+            if (halfYearFilter && halfYearLabel) {
+                if (selectedYear === 'all') {
+                    halfYearFilter.style.display = 'none';
+                    halfYearLabel.style.display = 'none';
+                    halfYearFilter.value = 'all';
+                } else {
+                    halfYearFilter.style.display = 'inline-block';
+                    halfYearLabel.style.display = 'inline-block';
+                }
+            }
+            
+            const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+            updateDepartmentChart(selectedYear, selectedHalfYear);
+        });
+    }
     
-    document.getElementById('system-year-filter').addEventListener('change', function() {
-        updateSystemChart(this.value);
-    });
+    const deptHalfYearFilter = document.getElementById('dept-half-year-filter');
+    if (deptHalfYearFilter) {
+        deptHalfYearFilter.addEventListener('change', function() {
+            const selectedYear = document.getElementById('dept-year-filter').value;
+            const selectedHalfYear = this.value;
+            console.log('部门图表半年度筛选器变化:', selectedYear, selectedHalfYear);
+            updateDepartmentChart(selectedYear, selectedHalfYear);
+        });
+    }
     
-    document.getElementById('type-year-filter').addEventListener('change', function() {
-        updateTypeChart(this.value);
-    });
+    const systemYearFilter = document.getElementById('system-year-filter');
+    if (systemYearFilter) {
+        systemYearFilter.addEventListener('change', function() {
+            const selectedYear = this.value;
+            const halfYearFilter = document.getElementById('system-half-year-filter');
+            const halfYearLabel = document.getElementById('system-half-year-label');
+            
+            // 显示或隐藏半年度筛选器
+            if (halfYearFilter && halfYearLabel) {
+                if (selectedYear === 'all') {
+                    halfYearFilter.style.display = 'none';
+                    halfYearLabel.style.display = 'none';
+                    halfYearFilter.value = 'all';
+                } else {
+                    halfYearFilter.style.display = 'inline-block';
+                    halfYearLabel.style.display = 'inline-block';
+                }
+            }
+            
+            const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+            updateSystemChart(selectedYear, selectedHalfYear);
+        });
+    }
     
-    document.getElementById('status-year-filter').addEventListener('change', function() {
-        updateStatusChart(this.value);
-    });
+    const systemHalfYearFilter = document.getElementById('system-half-year-filter');
+    if (systemHalfYearFilter) {
+        systemHalfYearFilter.addEventListener('change', function() {
+            const selectedYear = document.getElementById('system-year-filter').value;
+            const selectedHalfYear = this.value;
+            console.log('系统图表半年度筛选器变化:', selectedYear, selectedHalfYear);
+            updateSystemChart(selectedYear, selectedHalfYear);
+        });
+    }
     
-    document.getElementById('monthly-year-filter').addEventListener('change', function() {
-        updateMonthlyChart(this.value);
-    });
+    const typeYearFilter = document.getElementById('type-year-filter');
+    if (typeYearFilter) {
+        typeYearFilter.addEventListener('change', function() {
+            const selectedYear = this.value;
+            const halfYearFilter = document.getElementById('type-half-year-filter');
+            const halfYearLabel = document.getElementById('type-half-year-label');
+            
+            // 显示或隐藏半年度筛选器
+            if (halfYearFilter && halfYearLabel) {
+                if (selectedYear === 'all') {
+                    halfYearFilter.style.display = 'none';
+                    halfYearLabel.style.display = 'none';
+                    halfYearFilter.value = 'all';
+                } else {
+                    halfYearFilter.style.display = 'inline-block';
+                    halfYearLabel.style.display = 'inline-block';
+                }
+            }
+            
+            const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+            updateTypeChart(selectedYear, selectedHalfYear);
+        });
+    }
+    
+    const typeHalfYearFilter = document.getElementById('type-half-year-filter');
+    if (typeHalfYearFilter) {
+        typeHalfYearFilter.addEventListener('change', function() {
+            const selectedYear = document.getElementById('type-year-filter').value;
+            const selectedHalfYear = this.value;
+            updateTypeChart(selectedYear, selectedHalfYear);
+        });
+    }
+    
+    const statusYearFilter = document.getElementById('status-year-filter');
+    if (statusYearFilter) {
+        statusYearFilter.addEventListener('change', function() {
+            const selectedYear = this.value;
+            const halfYearFilter = document.getElementById('status-half-year-filter');
+            const halfYearLabel = document.getElementById('status-half-year-label');
+            
+            // 显示或隐藏半年度筛选器
+            if (halfYearFilter && halfYearLabel) {
+                if (selectedYear === 'all') {
+                    halfYearFilter.style.display = 'none';
+                    halfYearLabel.style.display = 'none';
+                    halfYearFilter.value = 'all';
+                } else {
+                    halfYearFilter.style.display = 'inline-block';
+                    halfYearLabel.style.display = 'inline-block';
+                }
+            }
+            
+            const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+            updateStatusChart(selectedYear, selectedHalfYear);
+        });
+    }
+    
+    const statusHalfYearFilter = document.getElementById('status-half-year-filter');
+    if (statusHalfYearFilter) {
+        statusHalfYearFilter.addEventListener('change', function() {
+            const selectedYear = document.getElementById('status-year-filter').value;
+            const selectedHalfYear = this.value;
+            updateStatusChart(selectedYear, selectedHalfYear);
+        });
+    }
+    
+    const monthlyYearFilter = document.getElementById('monthly-year-filter');
+    if (monthlyYearFilter) {
+        monthlyYearFilter.addEventListener('change', function() {
+            const selectedYear = this.value;
+            const halfYearFilter = document.getElementById('monthly-half-year-filter');
+            const halfYearLabel = document.getElementById('monthly-half-year-label');
+            
+            // 显示或隐藏半年度筛选器
+            if (halfYearFilter && halfYearLabel) {
+                if (selectedYear === 'all') {
+                    halfYearFilter.style.display = 'none';
+                    halfYearLabel.style.display = 'none';
+                    halfYearFilter.value = 'all';
+                } else {
+                    halfYearFilter.style.display = 'inline-block';
+                    halfYearLabel.style.display = 'inline-block';
+                }
+            }
+            
+            const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+            updateMonthlyChart(selectedYear, selectedHalfYear);
+        });
+    }
+    
+    const monthlyHalfYearFilter = document.getElementById('monthly-half-year-filter');
+    if (monthlyHalfYearFilter) {
+        monthlyHalfYearFilter.addEventListener('change', function() {
+            const selectedYear = document.getElementById('monthly-year-filter').value;
+            const selectedHalfYear = this.value;
+            updateMonthlyChart(selectedYear, selectedHalfYear);
+        });
+    }
     
     // 草稿勾选框事件监听器
     document.getElementById('exclude-draft').addEventListener('change', function() {
         const yearFilter = document.getElementById('status-year-filter');
-        updateStatusChart(yearFilter.value);
+        const halfYearFilter = document.getElementById('status-half-year-filter');
+        const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+        updateStatusChart(yearFilter.value, selectedHalfYear);
     });
     
     document.getElementById('exclude-draft-dept').addEventListener('change', function() {
         const yearFilter = document.getElementById('dept-year-filter');
-        updateDepartmentChart(yearFilter.value);
+        const halfYearFilter = document.getElementById('dept-half-year-filter');
+        const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+        updateDepartmentChart(yearFilter.value, selectedHalfYear);
     });
     
     // 显示原始部门切换事件监听器
     document.getElementById('show-original-dept').addEventListener('change', function() {
         const yearFilter = document.getElementById('dept-year-filter');
-        updateDepartmentChart(yearFilter.value);
+        const halfYearFilter = document.getElementById('dept-half-year-filter');
+        const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+        updateDepartmentChart(yearFilter.value, selectedHalfYear);
     });
     
     document.getElementById('exclude-draft-system').addEventListener('change', function() {
         const yearFilter = document.getElementById('system-year-filter');
-        updateSystemChart(yearFilter.value);
+        const halfYearFilter = document.getElementById('system-half-year-filter');
+        const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+        updateSystemChart(yearFilter.value, selectedHalfYear);
     });
     
     document.getElementById('exclude-draft-type').addEventListener('change', function() {
         const yearFilter = document.getElementById('type-year-filter');
-        updateTypeChart(yearFilter.value);
+        const halfYearFilter = document.getElementById('type-half-year-filter');
+        const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+        updateTypeChart(yearFilter.value, selectedHalfYear);
     });
     
     document.getElementById('exclude-draft-year').addEventListener('change', function() {
@@ -199,7 +356,9 @@ function setupEventListeners() {
     
     document.getElementById('exclude-draft-monthly').addEventListener('change', function() {
         const yearFilter = document.getElementById('monthly-year-filter');
-        updateMonthlyChart(yearFilter.value);
+        const halfYearFilter = document.getElementById('monthly-half-year-filter');
+        const selectedHalfYear = halfYearFilter ? halfYearFilter.value : 'all';
+        updateMonthlyChart(yearFilter.value, selectedHalfYear);
     });
     
     // 部门标题点击事件
@@ -220,18 +379,49 @@ function setupEventListeners() {
     });
     
     // 模态框内的筛选器事件
-    document.getElementById('modal-year-filter').addEventListener('change', function() {
-        updateDepartmentModalData();
-    });
+    const modalYearFilter = document.getElementById('modal-year-filter');
+    if (modalYearFilter) {
+        modalYearFilter.addEventListener('change', function() {
+            const selectedYear = this.value;
+            const halfYearFilter = document.getElementById('modal-half-year-filter');
+            const halfYearLabel = document.getElementById('modal-half-year-label');
+            
+            // 显示或隐藏半年度筛选器
+            if (halfYearFilter && halfYearLabel) {
+                if (selectedYear === 'all') {
+                    halfYearFilter.style.display = 'none';
+                    halfYearLabel.style.display = 'none';
+                    halfYearFilter.value = 'all';
+                } else {
+                    halfYearFilter.style.display = 'inline-block';
+                    halfYearLabel.style.display = 'inline-block';
+                }
+            }
+            
+            updateDepartmentModalData();
+        });
+    }
     
-    document.getElementById('modal-exclude-draft').addEventListener('change', function() {
-        updateDepartmentModalData();
-    });
+    const modalHalfYearFilter = document.getElementById('modal-half-year-filter');
+    if (modalHalfYearFilter) {
+        modalHalfYearFilter.addEventListener('change', function() {
+            updateDepartmentModalData();
+        });
+    }
     
-    // 模态框内的原始部门切换
-    document.getElementById('modal-show-original-dept').addEventListener('change', function() {
-        updateDepartmentModalData();
-    });
+    const modalExcludeDraft = document.getElementById('modal-exclude-draft');
+    if (modalExcludeDraft) {
+        modalExcludeDraft.addEventListener('change', function() {
+            updateDepartmentModalData();
+        });
+    }
+    
+    const modalShowOriginalDept = document.getElementById('modal-show-original-dept');
+    if (modalShowOriginalDept) {
+        modalShowOriginalDept.addEventListener('change', function() {
+            updateDepartmentModalData();
+        });
+    }
     
     // 原始部门切换也需要更新模态框数据
     document.getElementById('show-original-dept').addEventListener('change', function() {
@@ -247,7 +437,7 @@ function setupEventListeners() {
 }
 
 // 更新筛选统计信息
-function updateFilteredStats(year, halfYear = 'full') {
+function updateFilteredStats(year, halfYear = 'all') {
     const filteredCountElement = document.getElementById('filtered-count');
     
     if (year === 'all') {
@@ -258,7 +448,7 @@ function updateFilteredStats(year, halfYear = 'full') {
         
         // 根据半年度筛选调整显示文本和数量
         let displayText = '';
-        if (halfYear === 'full') {
+        if (halfYear === 'all') {
             displayText = `${year}年共 ${yearCount.toLocaleString()} 张工单`;
         } else {
             // 使用月度数据计算准确的半年度统计
@@ -302,6 +492,70 @@ function calculateHalfYearCount(year, halfYear) {
     }
     
     return count;
+}
+
+// 根据月度数据计算真实的半年度数据
+function calculateRealHalfYearData(year, halfYear) {
+    if (!ticketData.monthly_by_year || !ticketData.monthly_by_year[year]) {
+        return null;
+    }
+    
+    const monthlyData = ticketData.monthly_by_year[year];
+    const labels = monthlyData.labels;
+    const data = monthlyData.data;
+    
+    if (halfYear === 'all') {
+        return { labels, data };
+    }
+    
+    // 计算上半年（1-6月）或下半年（7-12月）的总数
+    let total = 0;
+    for (let i = 0; i < labels.length; i++) {
+        const month = parseInt(labels[i].split('-')[1]); // 提取月份
+        if (halfYear === 'first' && month >= 1 && month <= 6) {
+            total += data[i];
+        } else if (halfYear === 'second' && month >= 7 && month <= 12) {
+            total += data[i];
+        }
+    }
+    
+    return total;
+}
+
+// 计算半年度部门数据
+function calculateHalfYearDepartmentData(year, halfYear, excludeDraft, isOriginal) {
+    // 获取年度总数据
+    const sourceData = isOriginal ? 
+        (excludeDraft ? ticketData.original_dept_by_year_all_no_draft : ticketData.original_dept_by_year_all) :
+        (excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year);
+    
+    const yearData = sourceData[year] || { labels: [], data: [] };
+    
+    if (halfYear === 'all') {
+        return yearData;
+    }
+    
+    // 获取该年度的真实半年度比例
+    const yearTotal = calculateRealHalfYearData(year, 'all');
+    const halfYearTotal = calculateRealHalfYearData(year, halfYear);
+    
+    if (!yearTotal || !halfYearTotal || yearTotal.data.reduce((a, b) => a + b, 0) === 0) {
+        // 如果没有月度数据，使用默认比例
+        const ratio = halfYear === 'first' ? 0.6 : 0.4;
+        return {
+            labels: yearData.labels,
+            data: yearData.data.map(count => Math.round(count * ratio))
+        };
+    }
+    
+    // 计算真实比例
+    const totalYearTickets = yearTotal.data.reduce((a, b) => a + b, 0);
+    const ratio = halfYearTotal / totalYearTickets;
+    
+    return {
+        labels: yearData.labels,
+        data: yearData.data.map(count => Math.round(count * ratio))
+    };
 }
 
 // 根据年份更新所有图表
@@ -387,7 +641,7 @@ function createDepartmentChart() {
 }
 
 // 更新部门图表
-function updateDepartmentChart(year) {
+function updateDepartmentChart(year, halfYear = 'all') {
     if (!charts.department) return;
     
     const excludeDraft = document.getElementById('exclude-draft-dept').checked;
@@ -405,7 +659,13 @@ function updateDepartmentChart(year) {
             };
         } else {
             const sourceData = excludeDraft ? ticketData.original_dept_by_year_all_no_draft : ticketData.original_dept_by_year_all;
-            const yearData = sourceData[year] || { labels: [], data: [] };
+            let yearData = sourceData[year] || { labels: [], data: [] };
+            
+            // 如果选择了半年度筛选，需要根据月度数据重新计算
+            if (halfYear !== 'all' && ticketData.monthly_by_year && ticketData.monthly_by_year[year]) {
+                yearData = calculateHalfYearDepartmentData(year, halfYear, excludeDraft, true);
+            }
+            
             // 取前10个部门显示
             data = {
                 labels: yearData.labels.slice(0, 10),
@@ -418,7 +678,14 @@ function updateDepartmentChart(year) {
             data = excludeDraft ? ticketData.dept_top10_no_draft : ticketData.dept_top10;
         } else {
             const sourceData = excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year;
-            data = sourceData[year] || { labels: [], data: [] };
+            let yearData = sourceData[year] || { labels: [], data: [] };
+            
+            // 如果选择了半年度筛选，需要根据月度数据重新计算
+            if (halfYear !== 'all' && ticketData.monthly_by_year && ticketData.monthly_by_year[year]) {
+                yearData = calculateHalfYearDepartmentData(year, halfYear, excludeDraft, false);
+            }
+            
+            data = yearData;
         }
     }
     
@@ -480,7 +747,7 @@ function createSystemChart() {
 }
 
 // 更新系统图表
-function updateSystemChart(year) {
+function updateSystemChart(year, halfYear = 'all') {
     if (!charts.system) return;
     
     const excludeDraft = document.getElementById('exclude-draft-system').checked;
@@ -490,7 +757,32 @@ function updateSystemChart(year) {
         data = excludeDraft ? ticketData.system_stats_no_draft : ticketData.system_stats;
     } else {
         const sourceData = excludeDraft ? ticketData.system_by_year_no_draft : ticketData.system_by_year;
-        data = sourceData[year] || { 'OA系统': 0, '营销平台': 0, 'U8C': 0 };
+        let yearData = sourceData[year] || { 'OA系统': 0, '营销平台': 0, 'U8C': 0 };
+        
+        // 如果选择了半年度筛选，使用真实的月度数据计算比例
+        if (halfYear !== 'all') {
+            // 获取该年度的真实半年度比例
+            const yearTotal = calculateRealHalfYearData(year, 'all');
+            const halfYearTotal = calculateRealHalfYearData(year, halfYear);
+            
+            let ratio;
+            if (yearTotal && halfYearTotal && yearTotal.data.reduce((a, b) => a + b, 0) > 0) {
+                // 使用真实比例
+                const totalYearTickets = yearTotal.data.reduce((a, b) => a + b, 0);
+                ratio = halfYearTotal / totalYearTickets;
+            } else {
+                // 如果没有月度数据，使用默认比例
+                ratio = halfYear === 'first' ? 0.6 : 0.4;
+            }
+            
+            const adjustedData = {};
+            Object.keys(yearData).forEach(key => {
+                adjustedData[key] = Math.round(yearData[key] * ratio);
+            });
+            data = adjustedData;
+        } else {
+            data = yearData;
+        }
     }
     
     charts.system.data.labels = Object.keys(data);
@@ -634,7 +926,7 @@ function createTypeChart() {
 }
 
 // 更新工单类型图表
-function updateTypeChart(year) {
+function updateTypeChart(year, halfYear = 'all') {
     if (!charts.type) return;
     
     const excludeDraft = document.getElementById('exclude-draft-type').checked;
@@ -644,7 +936,31 @@ function updateTypeChart(year) {
         data = excludeDraft ? ticketData.type_stats_no_draft : ticketData.type_stats;
     } else {
         const sourceData = excludeDraft ? ticketData.type_by_year_no_draft : ticketData.type_by_year;
-        data = sourceData[year] || { labels: [], data: [] };
+        let yearData = sourceData[year] || { labels: [], data: [] };
+        
+        // 如果选择了半年度筛选，使用真实的月度数据计算比例
+        if (halfYear !== 'all') {
+            // 获取该年度的真实半年度比例
+            const yearTotal = calculateRealHalfYearData(year, 'all');
+            const halfYearTotal = calculateRealHalfYearData(year, halfYear);
+            
+            let ratio;
+            if (yearTotal && halfYearTotal && yearTotal.data.reduce((a, b) => a + b, 0) > 0) {
+                // 使用真实比例
+                const totalYearTickets = yearTotal.data.reduce((a, b) => a + b, 0);
+                ratio = halfYearTotal / totalYearTickets;
+            } else {
+                // 如果没有月度数据，使用默认比例
+                ratio = halfYear === 'first' ? 0.6 : 0.4;
+            }
+            
+            data = {
+                labels: yearData.labels,
+                data: yearData.data.map(count => Math.round(count * ratio))
+            };
+        } else {
+            data = yearData;
+        }
     }
     
     charts.type.data.labels = data.labels;
@@ -735,7 +1051,7 @@ function createStatusChart() {
 }
 
 // 更新工单状态图表
-function updateStatusChart(year) {
+function updateStatusChart(year, halfYear = 'all') {
     if (!charts.status) return;
     
     let statusData;
@@ -747,6 +1063,32 @@ function updateStatusChart(year) {
     } else {
         statusData = ticketData.status_by_year[year] || { labels: [], data: [] };
         auditData = ticketData.audit_by_year[year] || { labels: [], data: [] };
+    }
+    
+    // 如果选择了半年度筛选，使用真实的月度数据计算比例
+    if (halfYear !== 'all' && year !== 'all') {
+        // 获取该年度的真实半年度比例
+        const yearTotal = calculateRealHalfYearData(year, 'all');
+        const halfYearTotal = calculateRealHalfYearData(year, halfYear);
+        
+        let ratio;
+        if (yearTotal && halfYearTotal && yearTotal.data.reduce((a, b) => a + b, 0) > 0) {
+            // 使用真实比例
+            const totalYearTickets = yearTotal.data.reduce((a, b) => a + b, 0);
+            ratio = halfYearTotal / totalYearTickets;
+        } else {
+            // 如果没有月度数据，使用默认比例
+            ratio = halfYear === 'first' ? 0.6 : 0.4;
+        }
+        
+        statusData = {
+            labels: statusData.labels,
+            data: statusData.data.map(value => Math.round(value * ratio))
+        };
+        auditData = {
+            labels: auditData.labels,
+            data: auditData.data.map(value => Math.round(value * ratio))
+        };
     }
     
     // 检查是否需要排除草稿
@@ -884,7 +1226,7 @@ function createMonthlyChart() {
 }
 
 // 更新月度趋势图表
-function updateMonthlyChart(year) {
+function updateMonthlyChart(year, halfYear = 'all') {
     if (!charts.monthly) return;
     
     const excludeDraft = document.getElementById('exclude-draft-monthly').checked;
@@ -895,6 +1237,25 @@ function updateMonthlyChart(year) {
     } else {
         const sourceData = excludeDraft ? ticketData.monthly_by_year_no_draft : ticketData.monthly_by_year;
         data = sourceData[year] || { labels: [], data: [] };
+    }
+    
+    // 如果选择了半年度筛选，只显示对应的月份数据
+    if (halfYear !== 'all' && year !== 'all') {
+        const monthIndices = halfYear === 'first' ? [0, 1, 2, 3, 4, 5] : [6, 7, 8, 9, 10, 11];
+        const filteredLabels = [];
+        const filteredData = [];
+        
+        monthIndices.forEach(index => {
+            if (index < data.labels.length) {
+                filteredLabels.push(data.labels[index]);
+                filteredData.push(data.data[index] || 0);
+            }
+        });
+        
+        data = {
+            labels: filteredLabels,
+            data: filteredData
+        };
     }
     
     charts.monthly.data.labels = data.labels;
