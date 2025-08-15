@@ -316,35 +316,43 @@ def process_ticket_data(excel_file):
         'data': [int(count) for year, count in year_counts_no_draft.items() if pd.notna(year)]
     }
     
-    # 4. 工单类型统计
-    type_counts = df['工单类型'].value_counts()
+    # 4. 工单类型子类型统计
+    # 过滤掉空值和NaN值
+    df_filtered = df[df['工单类型子类型'].notna() & (df['工单类型子类型'] != '')]
+    type_counts = df_filtered['工单类型子类型'].value_counts()
     type_stats = {
         'labels': type_counts.index.tolist(),
         'data': type_counts.values.tolist()
     }
     
-    # 4.1 按年度分组的工单类型统计
+    # 4.1 按年度分组的工单类型子类型统计
     type_by_year = {}
     for year in df['年份'].dropna().unique():
         year_data = df[df['年份'] == year]
-        year_type_counts = year_data['工单类型'].value_counts()
+        # 过滤掉空值和NaN值
+        year_data_filtered = year_data[year_data['工单类型子类型'].notna() & (year_data['工单类型子类型'] != '')]
+        year_type_counts = year_data_filtered['工单类型子类型'].value_counts()
         type_by_year[str(int(year))] = {
             'labels': year_type_counts.index.tolist(),
             'data': year_type_counts.values.tolist()
         }
     
-    # 4.2 工单类型统计（排除草稿）
-    type_counts_no_draft = df_no_draft['工单类型'].value_counts()
+    # 4.2 工单类型子类型统计（排除草稿）
+    # 过滤掉空值和NaN值
+    df_no_draft_filtered = df_no_draft[df_no_draft['工单类型子类型'].notna() & (df_no_draft['工单类型子类型'] != '')]
+    type_counts_no_draft = df_no_draft_filtered['工单类型子类型'].value_counts()
     type_stats_no_draft = {
         'labels': type_counts_no_draft.index.tolist(),
         'data': type_counts_no_draft.values.tolist()
     }
     
-    # 4.3 按年度分组的工单类型统计（排除草稿）
+    # 4.3 按年度分组的工单类型子类型统计（排除草稿）
     type_by_year_no_draft = {}
     for year in df_no_draft['年份'].dropna().unique():
         year_data = df_no_draft[df_no_draft['年份'] == year]
-        year_type_counts = year_data['工单类型'].value_counts()
+        # 过滤掉空值和NaN值
+        year_data_filtered = year_data[year_data['工单类型子类型'].notna() & (year_data['工单类型子类型'] != '')]
+        year_type_counts = year_data_filtered['工单类型子类型'].value_counts()
         type_by_year_no_draft[str(int(year))] = {
             'labels': year_type_counts.index.tolist(),
             'data': year_type_counts.values.tolist()
