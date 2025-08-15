@@ -10,6 +10,24 @@ import json
 from datetime import datetime
 from collections import Counter
 
+def clean_department_name(dept_name):
+    """
+    清理部门名称，去除括号及其内容
+    
+    Args:
+        dept_name (str): 原始部门名称
+    
+    Returns:
+        str: 清理后的部门名称
+    """
+    if pd.isna(dept_name):
+        return dept_name
+    
+    # 使用正则表达式去除括号及其内容
+    import re
+    cleaned_name = re.sub(r'\([^)]*\)', '', str(dept_name)).strip()
+    return cleaned_name
+
 def process_ticket_data(excel_file):
     """
     处理需求工单数据
@@ -35,6 +53,9 @@ def process_ticket_data(excel_file):
     
     # 清理数据：移除空行
     df = df.dropna(subset=['流水号'])
+    
+    # 清理部门名称，去除括号内容
+    df['所在部门'] = df['所在部门'].apply(clean_department_name)
     
     # 处理日期列
     df['创建日期'] = pd.to_datetime(df['创建日期'], errors='coerce')
