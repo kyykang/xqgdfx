@@ -155,6 +155,12 @@ function setupEventListeners() {
         updateDepartmentChart(yearFilter.value);
     });
     
+    // 显示原始部门切换事件监听器
+    document.getElementById('show-original-dept').addEventListener('change', function() {
+        const yearFilter = document.getElementById('dept-year-filter');
+        updateDepartmentChart(yearFilter.value);
+    });
+    
     document.getElementById('exclude-draft-system').addEventListener('change', function() {
         const yearFilter = document.getElementById('system-year-filter');
         updateSystemChart(yearFilter.value);
@@ -197,6 +203,16 @@ function setupEventListeners() {
     });
     
     document.getElementById('modal-exclude-draft').addEventListener('change', function() {
+        updateDepartmentModalData();
+    });
+    
+    // 模态框内的原始部门切换
+    document.getElementById('modal-show-original-dept').addEventListener('change', function() {
+        updateDepartmentModalData();
+    });
+    
+    // 原始部门切换也需要更新模态框数据
+    document.getElementById('show-original-dept').addEventListener('change', function() {
         updateDepartmentModalData();
     });
     
@@ -308,13 +324,35 @@ function updateDepartmentChart(year) {
     if (!charts.department) return;
     
     const excludeDraft = document.getElementById('exclude-draft-dept').checked;
+    const showOriginal = document.getElementById('show-original-dept').checked;
     let data;
     
-    if (year === 'all') {
-        data = excludeDraft ? ticketData.dept_top10_no_draft : ticketData.dept_top10;
+    if (showOriginal) {
+        // 显示原始部门数据
+        if (year === 'all') {
+            const sourceData = excludeDraft ? ticketData.original_dept_all_no_draft : ticketData.original_dept_all;
+            // 取前10个部门显示
+            data = {
+                labels: sourceData.labels.slice(0, 10),
+                data: sourceData.data.slice(0, 10)
+            };
+        } else {
+            const sourceData = excludeDraft ? ticketData.original_dept_by_year_all_no_draft : ticketData.original_dept_by_year_all;
+            const yearData = sourceData[year] || { labels: [], data: [] };
+            // 取前10个部门显示
+            data = {
+                labels: yearData.labels.slice(0, 10),
+                data: yearData.data.slice(0, 10)
+            };
+        }
     } else {
-        const sourceData = excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year;
-        data = sourceData[year] || { labels: [], data: [] };
+        // 显示映射后的一级部门数据
+        if (year === 'all') {
+            data = excludeDraft ? ticketData.dept_top10_no_draft : ticketData.dept_top10;
+        } else {
+            const sourceData = excludeDraft ? ticketData.dept_by_year_no_draft : ticketData.dept_by_year;
+            data = sourceData[year] || { labels: [], data: [] };
+        }
     }
     
     charts.department.data.labels = data.labels;
@@ -1056,15 +1094,26 @@ function updateDepartmentModalData() {
 function getAllDepartmentData(year, excludeDraft) {
     if (!ticketData) return [];
     
+    // 检查模态框内的原始部门复选框状态
+    const modalShowOriginal = document.getElementById('modal-show-original-dept').checked;
     let sourceData;
     
-    if (year === 'all') {
-        // 使用全部年份的完整数据
-        sourceData = excludeDraft ? ticketData.dept_all_no_draft : ticketData.dept_all;
+    if (modalShowOriginal) {
+        // 显示原始部门数据
+        if (year === 'all') {
+            sourceData = excludeDraft ? ticketData.original_dept_all_no_draft : ticketData.original_dept_all;
+        } else {
+            const yearData = excludeDraft ? ticketData.original_dept_by_year_all_no_draft : ticketData.original_dept_by_year_all;
+            sourceData = yearData[year] || { labels: [], data: [] };
+        }
     } else {
-        // 使用指定年份的完整数据
-        const yearData = excludeDraft ? ticketData.dept_by_year_all_no_draft : ticketData.dept_by_year_all;
-        sourceData = yearData[year] || { labels: [], data: [] };
+        // 显示映射后的一级部门数据
+        if (year === 'all') {
+            sourceData = excludeDraft ? ticketData.dept_all_no_draft : ticketData.dept_all;
+        } else {
+            const yearData = excludeDraft ? ticketData.dept_by_year_all_no_draft : ticketData.dept_by_year_all;
+            sourceData = yearData[year] || { labels: [], data: [] };
+        }
     }
     
     // 转换为数组格式

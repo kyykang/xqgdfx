@@ -198,6 +198,11 @@
                 <label for="only-draft">只显示草稿</label>
             </div>
             
+            <div class="filter-checkbox">
+                <input type="checkbox" id="show-original-dept">
+                <label for="show-original-dept">显示原始部门</label>
+            </div>
+            
             <div class="stats-info">
                 <div class="stat-item">
                     <strong id="total-count">0</strong> 张未结束工单
@@ -299,6 +304,14 @@
                 });
             }
             
+            // 显示原始部门复选框事件监听器
+            const showOriginalDeptCheckbox = document.getElementById('show-original-dept');
+            if (showOriginalDeptCheckbox) {
+                showOriginalDeptCheckbox.addEventListener('change', function() {
+                    displayTickets();
+                });
+            }
+            
             // 显示工单数据
             displayTickets();
         }
@@ -316,6 +329,7 @@
             // 获取复选框状态
             const excludeDraft = document.getElementById('exclude-draft').checked;
             const onlyDraft = document.getElementById('only-draft').checked;
+            const showOriginal = document.getElementById('show-original-dept').checked;
             
             // 获取工单数据
             let tickets;
@@ -359,10 +373,15 @@
                 const statusClass = auditStatus === '草稿' ? 'status-draft' : 
                                   auditStatus === '未审核' ? 'status-pending' : 'status-default';
                 
+                // 根据切换状态决定显示的部门名称
+                const departmentName = showOriginal ? 
+                    (ticket.所在部门 || '-') : 
+                    (ticket.一级部门 || ticket.所在部门 || '-');
+                
                 row.innerHTML = `
                     <td>${ticket.流水号 || '-'}</td>
                     <td>${ticket.申请人 || '-'}</td>
-                    <td>${ticket.所在部门 || '-'}</td>
+                    <td>${departmentName}</td>
                     <td>${ticket.创建日期 || '-'}</td>
                     <td>${ticket.工单类型 || '-'}</td>
                     <td><span class="audit-status ${statusClass}">${auditStatus}</span></td>
