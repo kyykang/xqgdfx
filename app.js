@@ -117,9 +117,31 @@ function initializeCharts() {
 function setupEventListeners() {
     // 全局年度筛选器
     const yearFilter = document.getElementById('year-filter');
+    const halfYearFilter = document.getElementById('half-year-filter');
+    const halfYearLabel = document.getElementById('half-year-label');
+    
     yearFilter.addEventListener('change', function() {
         const selectedYear = this.value;
-        updateFilteredStats(selectedYear);
+        
+        // 显示或隐藏半年度筛选器
+        if (selectedYear === 'all') {
+            halfYearFilter.style.display = 'none';
+            halfYearLabel.style.display = 'none';
+            halfYearFilter.value = 'full'; // 重置为全年
+        } else {
+            halfYearFilter.style.display = 'inline-block';
+            halfYearLabel.style.display = 'inline-block';
+        }
+        
+        updateFilteredStats(selectedYear, halfYearFilter.value);
+        updateChartsForYear(selectedYear);
+    });
+    
+    // 半年度筛选器
+    halfYearFilter.addEventListener('change', function() {
+        const selectedYear = yearFilter.value;
+        const selectedHalfYear = this.value;
+        updateFilteredStats(selectedYear, selectedHalfYear);
         updateChartsForYear(selectedYear);
     });
     
@@ -225,16 +247,61 @@ function setupEventListeners() {
 }
 
 // 更新筛选统计信息
-function updateFilteredStats(year) {
+function updateFilteredStats(year, halfYear = 'full') {
     const filteredCountElement = document.getElementById('filtered-count');
     
     if (year === 'all') {
         filteredCountElement.textContent = `显示全部 ${ticketData.summary.total_tickets.toLocaleString()} 张工单`;
     } else {
         const yearIndex = ticketData.year_stats.labels.indexOf(year);
-        const yearCount = yearIndex >= 0 ? ticketData.year_stats.data[yearIndex] : 0;
-        filteredCountElement.textContent = `${year}年共 ${yearCount.toLocaleString()} 张工单`;
+        let yearCount = yearIndex >= 0 ? ticketData.year_stats.data[yearIndex] : 0;
+        
+        // 根据半年度筛选调整显示文本和数量
+        let displayText = '';
+        if (halfYear === 'full') {
+            displayText = `${year}年共 ${yearCount.toLocaleString()} 张工单`;
+        } else {
+            // 使用月度数据计算准确的半年度统计
+            const halfYearCount = calculateHalfYearCount(year, halfYear);
+            if (halfYear === 'first') {
+                displayText = `${year}年上半年共 ${halfYearCount.toLocaleString()} 张工单`;
+            } else if (halfYear === 'second') {
+                displayText = `${year}年下半年共 ${halfYearCount.toLocaleString()} 张工单`;
+            }
+        }
+        
+        filteredCountElement.textContent = displayText;
     }
+}
+
+// 根据月度数据计算半年度工单数量
+function calculateHalfYearCount(year, halfYear) {
+    // 获取该年的月度数据
+    const monthlyData = ticketData.monthly_by_year[year];
+    if (!monthlyData || !monthlyData.labels || !monthlyData.data) {
+        return 0;
+    }
+    
+    let count = 0;
+    
+    // 遍历月度数据，根据月份判断是上半年还是下半年
+    for (let i = 0; i < monthlyData.labels.length; i++) {
+        const monthLabel = monthlyData.labels[i];
+        const monthValue = monthlyData.data[i];
+        
+        // 提取月份数字（格式：YYYY-MM）
+        const month = parseInt(monthLabel.split('-')[1]);
+        
+        if (halfYear === 'first' && month >= 1 && month <= 6) {
+            // 上半年：1-6月
+            count += monthValue;
+        } else if (halfYear === 'second' && month >= 7 && month <= 12) {
+            // 下半年：7-12月
+            count += monthValue;
+        }
+    }
+    
+    return count;
 }
 
 // 根据年份更新所有图表

@@ -109,7 +109,7 @@ body {
     font-size: 1rem;
 }
 
-#year-filter {
+#year-filter, #half-year-filter {
     padding: 10px 15px;
     border: 2px solid #e0e6ed;
     border-radius: 8px;
@@ -120,9 +120,15 @@ body {
     transition: border-color 0.3s ease;
 }
 
-#year-filter:focus {
+#year-filter:focus, #half-year-filter:focus {
     outline: none;
     border-color: #667eea;
+}
+
+#half-year-label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
 }
 
 .year-stats {
